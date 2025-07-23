@@ -3,16 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <title>highpre智能AI剪辑</title>
-    <!--<link rel="icon" href="static/favicon.ico">  回退方案 -->
-    <link rel="icon" href="static/favicon.svg" type="image/svg+xml"> <!-- SVG图标 -->
-    
+    <link rel="icon" href="static/favicon.svg" type="image/svg+xml">
+
     <style>
-        /* 引入本地字体 */
         @font-face {
             font-family: 'MiSans';
-            src: url('/static/fonts/MiSans-Heavy.ttf') format('truetype');
+            src: url('/static/fonts/MiSans.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
+            font-display: swap;
         }
 
         body {
@@ -27,6 +26,24 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            position: relative;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.6));
+            z-index: 0;
+            transition: background 1s ease;
+        }
+
+        .intro, .main-content {
+            position: relative;
+            z-index: 1;
         }
 
         .intro {
@@ -36,18 +53,18 @@
             transform: translate(-50%, -50%);
             text-align: center;
             opacity: 0;
-            pointer-events: none;
+            transition: opacity 1s ease;
         }
 
         .line1, .line2 {
             display: block;
             opacity: 0;
-            transform-origin: center;
+            transition: opacity 0.6s ease;
         }
 
         .line1 {
             font-size: 48px;
-            animation: explodeIn 0.8s ease-out forwards;
+            animation: fadeIn 0.8s ease-out forwards;
             animation-delay: 0.5s;
         }
 
@@ -55,12 +72,6 @@
             font-size: 28px;
             animation: fadeIn 0.6s ease forwards;
             animation-delay: 1.2s;
-        }
-
-        .line1.explode,
-        .line2.explode {
-            animation: particleExplode 0.8s ease forwards;
-            animation-delay: 3s;
         }
 
         .main-content {
@@ -73,10 +84,11 @@
             transition: opacity 0.5s ease;
         }
 
+        /* 视频预览区域（始终 16:9） */
         .video-preview {
             width: 80%;
             max-width: 600px;
-            height: 360px;
+            aspect-ratio: 16 / 9;
             background-color: #111;
             border-radius: 10px;
             overflow: hidden;
@@ -92,15 +104,34 @@
             object-fit: contain;
         }
 
-        .upload-btn-wrapper {
-            position: relative;
-            display: inline-block;
-            cursor: pointer;
+        /* 按钮容器 */
+        .upload-analyze-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 40px;
+            margin-top: 30px;
+            z-index: 2;
         }
 
-        .upload-btn-wrapper img {
-            width: 60px;
-            height: 60px;
+        .upload-btn-wrapper,
+        .analyze-btn-wrapper,
+        .reupload-btn-wrapper {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-btn-wrapper img,
+        .analyze-btn-wrapper img,
+        .reupload-btn-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
         }
 
         .upload-btn-wrapper input[type="file"] {
@@ -112,81 +143,69 @@
             cursor: pointer;
         }
 
-        /* 浮出按钮 */
-        .action-btn {
-            position: absolute;
-            bottom: -100px;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: all 0.6s ease;
-        }
-
-        .action-btn.show {
-            bottom: 80px;
-            opacity: 1;
-        }
-
-        .action-btn img {
-            width: 70px;
-            height: 70px;
-            cursor: pointer;
-        }
-
-        /* 动画定义 */
-        @keyframes explodeIn {
-            0% { transform: scale(0.5); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
+        #cutVideoContainer {
+            display: none;
         }
 
         @keyframes fadeIn {
             0% { opacity: 0; }
             100% { opacity: 1; }
         }
-
-        @keyframes particleExplode {
-            0% { transform: scale(1); opacity: 1; }
-            100% { transform: scale(2) rotate(360deg); opacity: 0; }
-        }
     </style>
 </head>
 <body>
 
-<div class="intro">
+<div class="intro" id="intro">
     <span class="line1" id="line1">欢迎使用</span><br>
     <span class="line2" id="line2">highpre智能AI剪辑系统</span>
 </div>
 
 <div class="main-content" id="mainContent">
-    <div class="video-preview" id="videoPreview">
-        <!-- 视频预览区域 -->
+    <!-- 视频预览区域（始终 16:9） -->
+    <div class="video-preview" id="videoPreview"></div>
+
+    <!-- 按钮容器 -->
+    <div class="upload-analyze-container">
+        <!-- 上传按钮 -->
+        <div class="upload-btn-wrapper" id="uploadBtnWrapper">
+            <img src="static/images/upload-icon.png" alt="选择视频">
+            <input type="file" accept="video/*" id="videoInput">
+        </div>
+
+        <!-- 分析按钮 -->
+        <div class="analyze-btn-wrapper" id="analyzeBtnWrapper">
+            <img src="static/images/analyze-icon.png" alt="分析视频">
+        </div>
+
+        <!-- 重新上传按钮 -->
+        <div class="reupload-btn-wrapper" id="reuploadBtnWrapper">
+            <img src="static/images/upload-icon.png" alt="重新上传">
+        </div>
     </div>
-    <div class="upload-btn-wrapper">
-        <img src="static/images/upload-icon.png" alt="选择视频">
-        <input type="file" accept="video/*" id="videoInput">
-    </div>
+
     <p id="fileName"></p>
 
-    <!-- 浮出按钮 -->
-    <div class="action-btn" id="actionBtn">
-        <img src="static/images/analyze-icon.png" alt="分析视频">
-    </div>
     <!-- 剪辑视频展示区域 -->
-    <div id="cutVideoContainer" class="video-preview" style="margin-top: 30px;">
-        <!-- 剪辑视频将插入到这里 -->
-    </div>
+    <div id="cutVideoContainer" class="video-preview" style="margin-top: 30px;"></div>
 </div>
 
 <script>
-    window.addEventListener('load', function () {
+    console.log("JS 开始执行");
+
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log("DOM 加载完成");
+
         const intro = document.querySelector('.intro');
         const line1 = document.getElementById('line1');
         const line2 = document.getElementById('line2');
         const mainContent = document.getElementById('mainContent');
+        const uploadBtnWrapper = document.getElementById('uploadBtnWrapper');
+        const analyzeBtnWrapper = document.getElementById('analyzeBtnWrapper');
+        const reuploadBtnWrapper = document.getElementById('reuploadBtnWrapper');
         const videoInput = document.getElementById('videoInput');
         const fileName = document.getElementById('fileName');
         const videoPreview = document.getElementById('videoPreview');
-        const actionBtn = document.getElementById('actionBtn');
+        const cutVideoContainer = document.getElementById('cutVideoContainer');
 
         let currentVideo = null;
 
@@ -195,15 +214,16 @@
             intro.style.opacity = 1;
         }, 100);
 
-        // 添加爆炸消失动画
-        setTimeout(() => {
-            line1.classList.add('explode');
-            line2.classList.add('explode');
-        }, 3000);
-
         // 动画结束后隐藏 intro，显示主内容
         setTimeout(() => {
-            intro.style.display = 'none';
+            intro.style.opacity = 0;
+            intro.style.pointerEvents = 'none';
+
+            // 恢复背景亮度
+            document.body.style.background = 'url("/static/images/background.jpg") no-repeat center center fixed';
+            document.body.style.backgroundSize = 'cover';
+
+            // 显示主内容
             mainContent.style.display = 'flex';
             mainContent.style.opacity = '1';
         }, 4000);
@@ -228,88 +248,92 @@
             videoElement.controls = true;
             videoElement.autoplay = true;
             videoElement.loop = false;
+            videoElement.muted = true;
 
             videoPreview.innerHTML = '';
             videoPreview.appendChild(videoElement);
             currentVideo = videoElement;
 
-            // 显示按钮
-            actionBtn.classList.add('show');
+            // 隐藏上传按钮，显示分析按钮 + 重新上传按钮
+            uploadBtnWrapper.style.display = 'none';
+            analyzeBtnWrapper.style.display = 'flex';
+            reuploadBtnWrapper.style.display = 'flex';
         });
 
-        // 按钮点击事件（调用接口剪辑视频）
-    actionBtn.addEventListener('click', function () {
-    if (!currentVideo) {
-        alert('请先上传视频');
-        return;
-    }
-
-    const file = videoInput.files[0];
-    const inputPath = '/videos/input';  // 示例路径，根据你的后端实际路径填写
-    const name = file.name;
-
-    // 获取视频总时长（单位秒）
-    const duration = currentVideo.duration;
-    console.log('视频总时长:', duration);
-
-    // 随机生成剪辑时间点
-    const start = Math.random() * (duration - 2);  // 开始时间
-    const end = start + 1 + Math.random() * (duration - start - 1); // 结束时间 >= start + 1
-
-    console.log('生成剪辑时间:', { start, end });
-
-    // 调用后端接口剪辑视频
-    fetch('/cut_video', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            start: start.toFixed(2),
-            end: end.toFixed(2),
-            path: inputPath,
-            name: name
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.code === 0) {
-            console.log('剪辑成功:', data.data.output);
-
-            // 显示剪辑后的视频
-            const videoContainer = document.getElementById('cutVideoContainer');
-            videoContainer.innerHTML = `
-                <video src="${data.data.output}" controls autoplay></video>
-            `;
-        } else {
-            alert('剪辑失败: ' + data.message);
-            console.error(data);
-        }
-    })
-    .catch(error => {
-        alert('调用剪辑接口失败');
-        console.error(error);
-    });
-});
-
-    // 识别函数（预留）
-    function analyzeVideo() {
-        // 示例返回剪辑信息
-        return [
-            {
-                start: 10.5,
-                end: 23.7,
-                path: "/videos/output/clip1.mp4",
-                name: "clip1.mp4"
-            },
-            {
-                start: 30.2,
-                end: 45.0,
-                path: "/videos/output/clip2.mp4",
-                name: "clip2.mp4"
+        // 分析按钮点击事件
+        analyzeBtnWrapper.addEventListener('click', function () {
+            if (!currentVideo) {
+                alert('请先上传视频');
+                return;
             }
-        ];
-    }
+
+            const file = videoInput.files[0];
+            const inputPath = '/videos/input';
+            const name = file.name;
+
+            const duration = currentVideo.duration;
+            const start = Math.random() * (duration - 2);
+            const end = start + 1 + Math.random() * (duration - start - 1);
+
+            fetch('/cut_video', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    start: start.toFixed(2),
+                    end: end.toFixed(2),
+                    path: inputPath,
+                    name: name
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.code === 0) {
+                    console.log('剪辑成功:', data.data.output);
+
+                    cutVideoContainer.style.display = 'block';
+                    cutVideoContainer.innerHTML = `
+                        <video src="${data.data.output}" controls autoplay></video>
+                    `;
+
+                    // 隐藏分析按钮，显示重新上传按钮
+                    uploadBtnWrapper.style.display = 'none';
+                    analyzeBtnWrapper.style.display = 'none';
+                    reuploadBtnWrapper.style.display = 'flex';
+                } else {
+                    alert('剪辑失败: ' + data.message);
+                    console.error(data);
+                }
+            })
+            .catch(error => {
+                alert('调用剪辑接口失败');
+                console.error(error);
+            });
+        });
+
+        // 重新上传按钮点击事件
+        reuploadBtnWrapper.addEventListener('click', function () {
+            // 清除视频
+            if (currentVideo) {
+                currentVideo.pause();
+                currentVideo.srcObject = null;
+                currentVideo = null;
+            }
+
+            // 清除剪辑视频
+            cutVideoContainer.style.display = 'none';
+            cutVideoContainer.innerHTML = '';
+
+            // 显示上传按钮，隐藏分析和重新上传按钮
+            uploadBtnWrapper.style.display = 'flex';
+            analyzeBtnWrapper.style.display = 'none';
+            reuploadBtnWrapper.style.display = 'none';
+
+            // 清除文件名
+            fileName.textContent = '';
+        });
+    });
 </script>
 
 </body>
