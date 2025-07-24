@@ -3,6 +3,25 @@ import ollama
 import subprocess
 import os
 from werkzeug.utils import secure_filename
+import logging
+import shutil
+
+# 配置日志
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+def clear_output_folder():
+    """清空输出文件夹"""
+    if os.path.exists(app.config['OUTPUT_FOLDER']):
+        for filename in os.listdir(app.config['OUTPUT_FOLDER']):
+            file_path = os.path.join(app.config['OUTPUT_FOLDER'], filename)
+            try:
+                if os.path.isfile(file_path) or os.path.islink(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                logger.error(f'删除文件失败 {file_path}: {e}')
 
 app = Flask(__name__)
 
@@ -20,6 +39,11 @@ os.makedirs(OUTPUT_FOLDER, exist_ok=True)
 @app.route('/')
 def home():
     return render_template('index.html')
+
+# 结果页面路由
+@app.route('/result')
+def result():
+    return render_template('result.html')
 
 # 预留的 Ollama 接口
 @app.route('/chatollama', methods=['POST'])
@@ -67,13 +91,21 @@ def cut_video():
             'message': '缺少必要参数'
         }), 400
 
+    # 清空输出文件夹
+    clear_output_folder()
+
     # 构建完整输入路径（假设视频在 INPUT_FOLDER 中）
     input_path = os.path.join(app.config['INPUT_FOLDER'], name)
     output_filename = f"cut_{name}"
     output_path = os.path.join(app.config['OUTPUT_FOLDER'], output_filename)
 
+    # 记录路径信息用于调试
+    logger.debug(f"Input path: {input_path}")
+    logger.debug(f"Output path: {output_path}")
+    logger.debug(f"Input file exists: {os.path.exists(input_path)}")
+
     # 检查输入文件是否存在
-    if not os.path.isfile(input_path):
+    if not os.path.exists(input_path):
         return jsonify({
             'code': 404,
             'message': f'视频文件不存在: {input_path}'
@@ -97,14 +129,38 @@ def cut_video():
     ]
 
     try:
+        # 记录要执行的命令
+        logger.debug(f"Executing command: {' '.join(command)}")
+        
         # 执行命令
-        result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        result = subprocess.run(
+            command, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.PIPE, 
+            text=True,
+            cwd=os.getcwd()  # 确保在正确的目录下执行
+        )
+
+        # 记录执行结果
+        logger.debug(f"Return code: {result.returncode}")
+        logger.debug(f"Stdout: {result.stdout}")
+        logger.debug(f"Stderr: {result.stderr}")
 
         if result.returncode != 0:
             return jsonify({
                 'code': 500,
                 'message': '视频剪切失败',
-                'error': result.stderr
+                'error': result.stderr,
+                'command': ' '.join(command)
+            }), 500
+
+        # 检查输出文件是否真的创建了
+        if not os.path.exists(output_path):
+            return jsonify({
+                'code': 500,
+                'message': '视频剪切完成但输出文件未创建',
+                'output_path': output_path,
+                'command': ' '.join(command)
             }), 500
 
         # 确保输出路径使用正斜杠，以便在 Web 中正确显示
@@ -119,10 +175,10 @@ def cut_video():
         })
 
     except Exception as e:
+        logger.error(f"Exception during video cutting: {str(e)}")
         return jsonify({
             'code': 500,
             'message': f'执行剪切时发生异常: {str(e)}'
         }), 500
-
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5839)
+    app.run(host='0.0.0.0', port=5839, debug=True)
