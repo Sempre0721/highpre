@@ -6,101 +6,578 @@
     <title>剪辑结果 - highpre智能AI剪辑</title>
     <link rel="icon" href="static/favicon.svg" type="image/svg+xml">
     <style>
-        @font-face {
-            font-family: 'MiSans';
-            src: url('/static/fonts/MiSans.ttf') format('truetype');
-            font-weight: normal;
-            font-style: normal;
-            font-display: swap;
-        }
+    /* 自定义字体 */
+    @font-face {
+        font-family: 'MiSans';
+        src: url('/static/fonts/MiSans.ttf') format('truetype');
+        font-weight: normal;
+        font-style: normal;
+        font-display: swap;
+    }
 
-        body {
-            margin: 0;
-            padding: 0;
-            background: url('/static/images/background.jpg') no-repeat center center fixed;
-            background-size: cover;
-            color: white;
-            font-family: 'MiSans', 'Segoe UI', sans-serif;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-        }
+    /* 页面基础样式 */
+    body {
+        margin: 0;
+        padding: 0;
+        background: url('/static/images/background.jpg') no-repeat center center fixed;
+        background-size: cover;
+        color: white;
+        font-family: 'MiSans', 'Segoe UI', sans-serif;
+        height: 100vh;
+        overflow: auto;
+        position: relative;
+    }
 
-        .container {
-            text-align: center;
-            z-index: 1;
-            height: 85vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-        }
+    /* 赛博朋克风格背景网格效果 */
+    body::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background:
+            linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+            repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.05) 2px, rgba(0, 255, 255, 0.05) 4px),
+            repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255, 0, 255, 0.05) 2px, rgba(255, 0, 255, 0.05) 4px);
+        z-index: 0;
+        pointer-events: none;
+    }
 
-        .video-container {
-            width: 80%;
-            max-width: 800px;
-            aspect-ratio: 16 / 9;
-            background-color: #111;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+    /* 页面内容容器 */
+    .container {
+        padding: 40px 20px;
+        min-height: 100vh;
+        z-index: 1;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-top: 0;
+    }
 
-        .video-container video {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-        }
+    /* 视频容器 */
+    .video-container {
+        width: 25vw;
+        height: 25vh;
+        max-width: 800px;
+        aspect-ratio: 16 / 9;
+        background-color: #111;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #00ffff;
+    }
 
-        .back-btn {
-            background-color: #39dcbb;
-            color: #000;
-            border: none;
-            padding: 12px 24px;
-            font-size: 16px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-family: 'MiSans', sans-serif;
-            font-weight: bold;
-            margin-top: 20px;
-            transition: all 0.3s ease;
-        }
+    .video-container video {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+    }
 
-        .back-btn:hover {
-            background-color: #2db09d;
-            transform: scale(1.05);
-        }
+    /* 返回按钮样式 */
+    .back-btn {
+        background-color: #39dcbb;
+        color: #000;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        border-radius: 30px;
+        cursor: pointer;
+        font-family: 'MiSans', sans-serif;
+        font-weight: bold;
+        margin-top: 2vh;
+        transition: all 0.3s ease;
+    }
 
-        h1 {
-            color: #39dcbb;
-            margin-bottom: 30px;
-        }
-    </style>
+    .back-btn:hover {
+        background-color: #2db09d;
+        transform: scale(1.05);
+    }
+
+    /* 标题样式 */
+    h1 {
+        color: #39dcbb;
+        text-shadow: 0 0 2px #00ffff;
+        margin-bottom: 20px;
+    }
+
+    /* 卡片容器 */
+    .cards-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+        width: 90vw;
+    }
+
+    /* 卡片样式 */
+    .card {
+        background-color: rgba(0, 0, 0, 0.6);
+        border-radius: 10px;
+        padding: 1vw;
+        width: 13vw;
+        box-shadow: 0 0 10px #00ffff;
+        transition: transform 0.2s ease;
+        border: 1px solid #00ffff;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .card:hover {
+        transform: scale(1.02);
+    }
+
+    .card h3 {
+        margin-top: 0;
+        color: #39dcbb;
+        text-align: center;
+        width: 100%;
+    }
+
+    .card label {
+        display: block;
+        margin: 10px 0 5px;
+        text-align: center;
+        width: 100%;
+    }
+
+    .card input,
+    .card select {
+        width: 100%;
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid #00ffff;
+        background-color: #333;
+        color: white;
+        box-sizing: border-box;
+    }
+
+    .card button {
+        margin-top: 1vh;
+        width: 100%;
+        padding: 10px;
+        background-color: #39dcbb;
+        color: #000;
+        border: none;
+        border-radius: 30px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+    }
+
+    .card button:hover {
+        background-color: #2db09d;
+        transform: scale(1.05);
+    }
+
+    /* 复选框样式 */
+    .checkbox-container {
+        display: flex;
+        align-items: center;
+        margin: 10px 0;
+        width: 100%;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+        width: auto;
+        margin-right: 8px;
+    }
+
+    /* 旋钮样式 */
+    .knob-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 15px 0;
+    }
+
+    .knob {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: #333;
+        border: 2px solid #00ffff;
+        position: relative;
+        cursor: pointer;
+        box-shadow: 0 0 10px #00ffff;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .knob::before {
+        content: "";
+        position: absolute;
+        width: 4px;
+        height: 25px;
+        background: #00ffff;
+        top: 5px;
+        transform-origin: bottom center;
+        border-radius: 2px;
+    }
+
+    .knob-value {
+        color: white;
+        font-size: 12px;
+        text-align: center;
+    }
+
+    /* 时间输入容器 */
+    .time-input-container {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    .time-input-container label {
+        width: auto;
+        margin: 0 5px 0 0;
+        text-align: left;
+    }
+
+    .time-input-container input {
+        flex: 1;
+        margin: 0 2px;
+    }
+
+    .colon {
+        margin: 0 2px;
+        font-weight: bold;
+    }
+</style>
 </head>
 <body>
     <div class="container">
-        <h1>剪辑完成</h1>
+        <h1>视频处理中心</h1>
+
         <div class="video-container">
             <video id="resultVideo" controls autoplay></video>
         </div>
+
+        <div class="cards-container">
+            <!-- 视频抽帧 -->
+            <div class="card">
+                <h3>视频抽帧</h3>
+                <label>帧率 (fps)</label>
+                <input type="number" min="1" value="1" class="param-fps">
+                <label>输出路径</label>
+                <input type="text" value="frames/frame_%04d.png" class="param-output">
+                <button onclick="processVideo('extract_frames')">开始处理</button>
+            </div>
+
+            <!-- 转换格式 -->
+            <div class="card">
+                <h3>转换格式</h3>
+                <label>目标格式</label>
+                <select class="param-format">
+                    <option value="mp4">MP4</option>
+                    <option value="avi">AVI</option>
+                    <option value="mkv">MKV</option>
+                    <option value="mov">MOV</option>
+                    <option value="wmv">WMV</option>
+                    <option value="flv">FLV</option>
+                    <option value="webm">WebM</option>
+                    <option value="m4v">M4V</option>
+                </select>
+                <label>输出路径</label>
+                <input type="text" value="output/output.mp4" class="param-output">
+                <button onclick="processVideo('convert_format')">开始处理</button>
+            </div>
+
+            <!-- 修改分辨率 -->
+            <div class="card">
+                <h3>修改分辨率</h3>
+                <label>宽度</label>
+                <input type="number" min="100" value="640" class="param-width">
+                <label>高度</label>
+                <input type="number" min="100" value="360" class="param-height">
+                <div class="checkbox-container">
+                    <input type="checkbox" class="param-keep-ratio" checked>
+                    <label>保持宽高比</label>
+                </div>
+                <label>输出路径</label>
+                <input type="text" value="output/resized_video.mp4" class="param-output">
+                <button onclick="processVideo('resize_video')">开始处理</button>
+            </div>
+
+            <!-- 裁剪视频 -->
+            <div class="card">
+                <h3>裁剪视频</h3>
+                <div class="time-input-container">
+                    <label>开始:</label>
+                    <input type="number" min="0" step="1" value="0" placeholder="时" class="param-start-h">
+                    <span class="colon">:</span>
+                    <input type="number" min="0" max="59" step="1" value="0" placeholder="分" class="param-start-m">
+                    <span class="colon">:</span>
+                    <input type="number" min="0" max="59" step="1" value="0" placeholder="秒" class="param-start-s">
+                    <span class="colon">:</span>
+                    <input type="number" min="0" max="999" step="1" value="0" placeholder="毫秒" class="param-start-ms">
+                </div>
+                <div class="time-input-container">
+                    <label>结束:</label>
+                    <input type="number" min="0" step="1" value="0" placeholder="时" class="param-end-h">
+                    <span class="colon">:</span>
+                    <input type="number" min="0" max="59" step="1" value="0" placeholder="分" class="param-end-m">
+                    <span class="colon">:</span>
+                    <input type="number" min="0" max="59" step="1" value="10" placeholder="秒" class="param-end-s">
+                    <span class="colon">:</span>
+                    <input type="number" min="0" max="999" step="1" value="0" placeholder="毫秒" class="param-end-ms">
+                </div>
+                <label>输出路径</label>
+                <input type="text" value="output/trimmed_video.mp4" class="param-output">
+                <button onclick="processVideo('trim_video')">开始处理</button>
+            </div>
+
+            <!-- 分离音频 -->
+            <div class="card">
+                <h3>分离音频</h3>
+                <label>输出格式</label>
+                <select class="param-audio-format">
+                    <option value="mp3">MP3</option>
+                    <option value="aac">AAC</option>
+                    <option value="wav">WAV</option>
+                    <option value="flac">FLAC</option>
+                    <option value="ogg">OGG</option>
+                </select>
+                <label>输出路径</label>
+                <input type="text" value="output/audio.mp3" class="param-output">
+                <button onclick="processVideo('extract_audio')">开始处理</button>
+            </div>
+
+            <!-- 提取 GIF -->
+            <div class="card">
+                <h3>提取 GIF</h3>
+                <div class="time-input-container">
+                    <label>开始:</label>
+                    <input type="number" min="0" step="1" value="0" placeholder="时" class="param-start-h">
+                    <span class="colon">:</span>
+                    <input type="number" min="0" max="59" step="1" value="0" placeholder="分" class="param-start-m">
+                    <span class="colon">:</span>
+                    <input type="number" min="0" max="59" step="1" value="0" placeholder="秒" class="param-start-s">
+                    <span class="colon">:</span>
+                    <input type="number" min="0" max="999" step="1" value="0" placeholder="毫秒" class="param-start-ms">
+                </div>
+                <div class="time-input-container">
+                    <label>结束:</label>
+                    <input type="number" min="0" step="1" value="0" placeholder="时" class="param-end-h">
+                    <span class="colon">:</span>
+                    <input type="number" min="0" max="59" step="1" value="0" placeholder="分" class="param-end-m">
+                    <span class="colon">:</span>
+                    <input type="number" min="0" max="59" step="1" value="5" placeholder="秒" class="param-end-s">
+                    <span class="colon">:</span>
+                    <input type="number" min="0" max="999" step="1" value="0" placeholder="毫秒" class="param-end-ms">
+                </div>
+                <label>输出路径</label>
+                <input type="text" value="output/clip.gif" class="param-output">
+                <button onclick="processVideo('extract_gif')">开始处理</button>
+            </div>
+
+            <!-- 调整码率 -->
+            <div class="card">
+                <h3>调整码率</h3>
+                <label>码率 (kb/s)</label>
+                <input type="number" min="100" value="1024" class="param-bitrate">
+                <label>输出路径</label>
+                <input type="text" value="output/bitrate_adjusted.mp4" class="param-output">
+                <button onclick="processVideo('adjust_bitrate')">开始处理</button>
+            </div>
+
+            <!-- 添加水印 -->
+            <div class="card">
+                <h3>添加水印</h3>
+                <label>水印位置</label>
+                <select class="param-position">
+                    <option value="top_left">左上</option>
+                    <option value="top_right">右上</option>
+                    <option value="bottom_left">左下</option>
+                    <option value="bottom_right">右下</option>
+                    <option value="center">居中</option>
+                </select>
+                <label>水印图片路径</label>
+                <input type="text" value="watermark.png" class="param-watermark-path">
+                <label>输出路径</label>
+                <input type="text" value="output/watermarked_video.mp4" class="param-output">
+                <button onclick="processVideo('add_watermark')">开始处理</button>
+            </div>
+
+            <!-- 合并视频 -->
+            <div class="card">
+                <h3>合并视频</h3>
+                <label>视频1路径</label>
+                <input type="text" value="video1.mp4" class="param-video1">
+                <label>视频2路径</label>
+                <input type="text" value="video2.mp4" class="param-video2">
+                <label>输出路径</label>
+                <input type="text" value="output/merged_video.mp4" class="param-output">
+                <button onclick="processVideo('concat_videos')">开始处理</button>
+            </div>
+
+            <!-- 调整音量 -->
+            <div class="card">
+                <h3>调整音量</h3>
+                <div class="knob-container">
+                    <div class="knob" id="volumeKnob"></div>
+                    <div class="knob-value" id="volumeValue">1.0</div>
+                </div>
+                <input type="hidden" class="param-volume" value="1.0">
+                <label>输出路径</label>
+                <input type="text" value="output/volume_adjusted.mp4" class="param-output">
+                <button onclick="processVideo('adjust_volume')">开始处理</button>
+            </div>
+        </div>
+
         <button class="back-btn" onclick="window.location.href='/'">返回主页</button>
     </div>
 
     <script>
-        
+        const videoElement = document.getElementById('resultVideo');
+        videoElement.src = '../videos/output/cut_test.mp4';
 
+        // 初始化音量旋钮
         document.addEventListener('DOMContentLoaded', function() {
-            // 直接设置固定的视频路径
-            const videoElement = document.getElementById('resultVideo');
-            videoElement.src = '../videos/output/cut_test.mp4';
+            const knob = document.getElementById('volumeKnob');
+            const knobValue = document.getElementById('volumeValue');
+            const volumeInput = document.querySelector('.param-volume');
+            let isDragging = false;
+            let startAngle = 0;
+            let startValue = 1.0;
+            
+            // 设置初始旋钮角度
+            updateKnob(1.0);
+            
+            knob.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                const rect = knob.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI;
+                startValue = parseFloat(volumeInput.value);
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (isDragging) {
+                    const rect = knob.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+                    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI;
+                    const delta = (angle - startAngle) / 180; // 180度对应0-2的范围
+                    let newValue = startValue + delta * 2;
+                    newValue = Math.min(3.0, Math.max(0.0, newValue)); // 限制在0.0-3.0之间
+                    updateKnob(newValue);
+                }
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+            });
+            
+            function updateKnob(value) {
+                volumeInput.value = value.toFixed(1);
+                knobValue.textContent = value.toFixed(1);
+                const rotation = (value - 1.0) * 90; // 1.0为中心点，对应0度旋转
+                knob.style.transform = `rotate(${rotation}deg)`;
+            }
         });
+
+        function processVideo(action) {
+            const videoPath = '../videos/output/cut_test.mp4';
+            let params = {};
+
+            switch (action) {
+                case 'extract_frames':
+                    params.fps = document.querySelector('.param-fps').value;
+                    params.output = document.querySelector('.param-output').value;
+                    break;
+                case 'convert_format':
+                    params.format = document.querySelector('.param-format').value;
+                    params.output = document.querySelector('.param-output').value;
+                    break;
+                case 'resize_video':
+                    params.width = document.querySelector('.param-width').value;
+                    params.height = document.querySelector('.param-height').value;
+                    params.keep_ratio = document.querySelector('.param-keep-ratio').checked;
+                    params.output = document.querySelector('.param-output').value;
+                    break;
+                case 'trim_video':
+                    const startH = parseInt(document.querySelector('.param-start-h').value) || 0;
+                    const startM = parseInt(document.querySelector('.param-start-m').value) || 0;
+                    const startS = parseInt(document.querySelector('.param-start-s').value) || 0;
+                    const startMs = parseInt(document.querySelector('.param-start-ms').value) || 0;
+                    const endH = parseInt(document.querySelector('.param-end-h').value) || 0;
+                    const endM = parseInt(document.querySelector('.param-end-m').value) || 0;
+                    const endS = parseInt(document.querySelector('.param-end-s').value) || 0;
+                    const endMs = parseInt(document.querySelector('.param-end-ms').value) || 0;
+                    
+                    params.start = startH * 3600 + startM * 60 + startS + startMs / 1000;
+                    params.end = endH * 3600 + endM * 60 + endS + endMs / 1000;
+                    params.output = document.querySelector('.param-output').value;
+                    break;
+                case 'extract_audio':
+                    params.format = document.querySelector('.param-audio-format').value;
+                    params.output = document.querySelector('.param-output').value;
+                    break;
+                case 'extract_gif':
+                    const gifStartH = parseInt(document.querySelector('.param-start-h').value) || 0;
+                    const gifStartM = parseInt(document.querySelector('.param-start-m').value) || 0;
+                    const gifStartS = parseInt(document.querySelector('.param-start-s').value) || 0;
+                    const gifStartMs = parseInt(document.querySelector('.param-start-ms').value) || 0;
+                    const gifEndH = parseInt(document.querySelector('.param-end-h').value) || 0;
+                    const gifEndM = parseInt(document.querySelector('.param-end-m').value) || 0;
+                    const gifEndS = parseInt(document.querySelector('.param-end-s').value) || 0;
+                    const gifEndMs = parseInt(document.querySelector('.param-end-ms').value) || 0;
+                    
+                    params.start = gifStartH * 3600 + gifStartM * 60 + gifStartS + gifStartMs / 1000;
+                    params.end = gifEndH * 3600 + gifEndM * 60 + gifEndS + gifEndMs / 1000;
+                    params.output = document.querySelector('.param-output').value;
+                    break;
+                case 'adjust_bitrate':
+                    params.bitrate = document.querySelector('.param-bitrate').value;
+                    params.output = document.querySelector('.param-output').value;
+                    break;
+                case 'add_watermark':
+                    params.position = document.querySelector('.param-position').value;
+                    params.watermark_path = document.querySelector('.param-watermark-path').value;
+                    params.output = document.querySelector('.param-output').value;
+                    break;
+                case 'concat_videos':
+                    params.video1 = document.querySelector('.param-video1').value;
+                    params.video2 = document.querySelector('.param-video2').value;
+                    params.output = document.querySelector('.param-output').value;
+                    break;
+                case 'adjust_volume':
+                    params.volume = document.querySelector('.param-volume').value;
+                    params.output = document.querySelector('.param-output').value;
+                    break;
+            }
+
+            fetch('/process_video', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    action: action,
+                    video_path: videoPath,
+                    params: params
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert('处理成功！输出路径：' + data.output_path);
+            })
+            .catch(err => {
+                alert('处理失败：' + err.message);
+            });
+        }
     </script>
 </body>
 </html>

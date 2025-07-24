@@ -26,6 +26,66 @@
             position: relative;
         }
 
+        /* 添加赛博朋克背景效果 */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 255, 255, 0.05) 2px,
+                    rgba(0, 255, 255, 0.05) 4px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(255, 0, 255, 0.05) 2px,
+                    rgba(255, 0, 255, 0.05) 4px
+                );
+            z-index: 0;
+            pointer-events: none;
+            animation: bg-animation 10s linear infinite;
+        }
+
+        /* 添加故障效果 */
+        @keyframes bg-animation {
+            0% { background-position: 0 0; }
+            100% { background-position: 100% 100%; }
+        }
+
+        /* 开屏特效动画 */
+        @keyframes screen-flicker {
+            0% { opacity: 0; }
+            5% { opacity: 0.2; }
+            10% { opacity: 0.1; }
+            15% { opacity: 0.3; }
+            20% { opacity: 0.2; }
+            25% { opacity: 0.4; }
+            30% { opacity: 0.3; }
+            35% { opacity: 0.5; }
+            40% { opacity: 0.4; }
+            45% { opacity: 0.6; }
+            50% { opacity: 0.5; }
+            55% { opacity: 0.7; }
+            60% { opacity: 0.6; }
+            65% { opacity: 0.8; }
+            70% { opacity: 0.7; }
+            75% { opacity: 0.9; }
+            80% { opacity: 0.8; }
+            85% { opacity: 1; }
+            90% { opacity: 0.9; }
+            95% { opacity: 1; }
+            100% { opacity: 1; }
+        }
+
         .intro, .main-content {
             position: relative;
             z-index: 1;
@@ -40,6 +100,11 @@
             opacity: 0;
             transition: opacity 1s ease;
             color: #39dcbb;
+            text-shadow: 
+                0 0 1px #00ffff,
+                0 0 1px #00ffff,
+                0 0 1px #00ffff;
+            animation: screen-flicker 1.5s ease-out;
         }
 
         .line1, .line2 {
@@ -65,40 +130,99 @@
             opacity: 0;
             transition: opacity 0.5s ease;
             height: 100%;
-            width: 85vw; 
+            width: 90vw; 
             margin: 0 auto; 
             overflow: hidden;
+            padding: 20px 0;
+            box-sizing: border-box;
         }
 
         .content-wrapper {
             display: flex;
             height: 100%;
-            padding: 20px 0;
+            gap: 20px;
             box-sizing: border-box;
         }
 
-        .left-panel {
-            flex: 0 0 60%;
+        .left-sidebar {
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+            display: flex;
+            flex-direction: column;
+            padding: 0 10px;
+            overflow-y: auto;
+            margin-top: 10vh;
+        }
+
+        .right-main-content {
+            flex: 2;
+            min-width: 300px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             padding: 0 20px;
             overflow-y: auto;
+            overflow-x: hidden; 
         }
 
         .right-panel {
-            flex: 0 0 40%;
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+            margin-top: 10vh;
             display: flex;
             flex-direction: column;
             padding: 0 20px;
             overflow-y: auto;
         }
 
+        /* 响应式设计 */
+        @media (max-width: 1200px) {
+            .content-wrapper {
+                gap: 15px;
+            }
+            
+            .left-sidebar, .right-panel {
+                min-width: 200px;
+            }
+            
+            .right-main-content {
+                min-width: 250px;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .main-content {
+                width: 95vw;
+            }
+            
+            .content-wrapper {
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .content-wrapper {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .left-sidebar, .right-panel {
+                max-width: none;
+                min-width: unset;
+            }
+            
+            .right-main-content {
+                min-width: unset;
+            }
+        }
+
         /* 视频预览区域（始终 16:9） */
         .video-preview {
             width: 100%;
-            max-width: 600px;
+            max-width: 1000px;
             aspect-ratio: 16 / 9;
             background-color: #111;
             border-radius: 10px;
@@ -107,6 +231,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            border: 1px solid #00ffff;
         }
 
         .video-preview video {
@@ -140,6 +265,7 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
+            transition: all 0.3s ease;
         }
 
         .upload-btn-wrapper input[type="file"] {
@@ -169,14 +295,16 @@
             border-radius: 10px;
             margin: 10px 0;
             display: none;
+            border: 1px solid #00ffff;
         }
         
         .progress-bar {
             height: 100%;
-            background-color: #4CAF50;
+            background: linear-gradient(90deg, #00ffff, #9900ff);
             border-radius: 10px;
             width: 0%;
             transition: width 0.3s ease;
+            box-shadow: 0 0 10px #00ffff;
         }
         
         /* 禁用按钮样式 */
@@ -220,10 +348,20 @@
             background-color: rgba(0, 0, 0, 0.7);
             border-radius: 10px;
             padding: 20px;
-            margin: 10px 15px;
-            margin-top: 8vh;
-            border: 1px solid #39dcbb;
-            width: 50%;
+            margin: 10px 0;
+            border: 1px solid #00ffff;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        
+        .model-panel {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            border: 1px solid #00ffff;
+            width: 100%;
+            box-sizing: border-box;
         }
         
         .panel-header {
@@ -240,7 +378,7 @@
         }
         
         .toggle-params {
-            background-color: #39dcbb;
+            background: linear-gradient(45deg, #00ffff, #9900ff);
             color: #000;
             border: none;
             padding: 8px 15px;
@@ -248,6 +386,7 @@
             cursor: pointer;
             font-family: 'MiSans', sans-serif;
             font-weight: bold;
+            box-shadow: 0 0 10px #00ffff;
         }
         
         .param-row {
@@ -272,7 +411,7 @@
             width: 100%;
             padding: 8px;
             border-radius: 5px;
-            border: 1px solid #39dcbb;
+            border: 1px solid #00ffff;
             background-color: #333;
             color: white;
             box-sizing: border-box;
@@ -281,6 +420,7 @@
         .param-slider {
             width: 100%;
             margin-top: 5px;
+            accent-color: #00ffff;
         }
         
         .param-row {
@@ -307,7 +447,7 @@
         }
         
         .reset-btn {
-            background-color: #ff6b6b;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
             color: white;
             border: none;
             padding: 10px 15px;
@@ -317,18 +457,20 @@
             font-weight: bold;
             margin-top: 10px;
             width: 100%;
+            box-shadow: 0 0 10px #ff00ff;
         }
         
         .reset-btn:hover {
-            background-color: #ff5252;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            box-shadow: 0 0 15px #ff00ff;
         }
         
         /* 文本显示区域 */
         .text-display {
-            width: 60%;
+            width: 100%;
             height: 150px;
             background-color: rgba(0, 0, 0, 0.7);
-            border: 1px solid #39dcbb;
+            border: 1px solid #00ffff;
             border-radius: 10px;
             padding: 10px;
             margin: 10px 0;
@@ -336,19 +478,94 @@
             font-family: 'MiSans', monospace;
             font-size: 14px;
             resize: vertical;
+            box-sizing: border-box;
         }
         
-        /* 隐藏滚动条 */
-        .left-panel::-webkit-scrollbar,
+        .model-panel .text-display {
+            height: 100px;
+        }
+        
+        /* 自定义滚动条样式 */
+        .left-sidebar::-webkit-scrollbar,
+        .right-main-content::-webkit-scrollbar,
         .right-panel::-webkit-scrollbar {
-            width: 0px;
-            background: transparent;
+            width: 8px;
+            background: rgba(0, 0, 0, 0.3);
         }
         
-        .left-panel,
+        .left-sidebar::-webkit-scrollbar-thumb,
+        .right-main-content::-webkit-scrollbar-thumb,
+        .right-panel::-webkit-scrollbar-thumb {
+            background: linear-gradient(#00ffff, #9900ff);
+            border-radius: 4px;
+        }
+        
+        .left-sidebar,
+        .right-main-content,
         .right-panel {
-            scrollbar-width: none;
-            -ms-overflow-style: none;
+            scrollbar-width: thin;
+            scrollbar-color: #00ffff rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 卡片动效 - 赛博朋克风格 */
+        .card {
+            transition: all 0.3s ease;
+            transform-origin: center;
+            border: 1px solid transparent;
+        }
+
+        /* 悬停时只轻微变化，不抖动 */
+        .card:hover {
+            transform: scale(1.02);
+            box-shadow: 
+                0 0 10px #9900ff,
+                0 0 20px #9900ff,
+                inset 0 0 10px #00ffff;
+            border: 1px solid #00ffff;
+        }
+
+        /* 特定元素的霓虹效果 */
+        .upload-btn-wrapper:hover img,
+        .analyze-btn-wrapper:hover img {
+            width: 100%;
+        }
+
+        /* 为指定元素添加特定类名以便调整 */
+        .ffmpeg-params-panel.custom-panel {
+            width: 100%;
+        }
+        
+        .model-panel.custom-panel {
+            width: 100%;
+        }
+        
+        .right-main-content.custom-content {
+            width: 100%;
+        }
+
+        /* 移除按钮的悬停效果 */
+        .upload-analyze-container .card:hover,
+        .upload-btn-wrapper:hover,
+        .analyze-btn-wrapper:hover,
+        .cut-btn-wrapper:hover {
+            transform: none;
+            box-shadow: none;
+            border: none;
+        }
+
+        /* 故障效果应用于关键元素 */
+        .glitch-effect {
+            position: relative;
+        }
+        
+        /* 中间标题样式 */
+        .main-title {
+            color: #39dcbb;
+            font-size: 300%;
+            text-align: center;
+            margin: 10px 0 20px 0;
+            
+            font-weight: bold;
         }
     </style>
 </head>
@@ -362,10 +579,81 @@
     <!-- 主内容区域 -->
     <div class="main-content" id="mainContent">
         <div class="content-wrapper">
-            <!-- 左侧主面板 -->
-            <div class="left-panel">
+            <!-- 左侧边栏 -->
+            <div class="left-sidebar">
+                <div class="model-panel card custom-panel">
+                    <div class="panel-header">
+                        <div class="panel-title">模型设置</div>
+                    </div>
+                    
+                    <div class="param-group">
+                        <label class="param-label">模型来源</label>
+                        <select class="param-input" id="modelSource">
+                            <option value="local" selected>本地模型</option>
+                            <option value="online">网络模型</option>
+                        </select>
+                    </div>
+                    
+                    <div class="param-group">
+                        <label class="param-label">模型选择</label>
+                        <select class="param-input" id="modelSelection">
+                            <option value="qwen2.5vl:3b" selected>qwen2.5vl:3b</option>
+                            <option value="gpt-4">GPT-4</option>
+                            <option value="claude-3">Claude 3</option>
+                            <option value="llama-3">Llama 3</option>
+                            <option value="gemini-pro">Gemini Pro</option>
+                            <option value="qwen-turbo">通义千问 Turbo</option>
+                        </select>
+                    </div>
+                    
+                    <div class="param-group">
+                        <label class="param-label">剪辑需求描述</label>
+                        <textarea class="param-input text-display" id="editingRequirements" placeholder="描述您的剪辑需求，例如：提取产品介绍片段、剪出精彩瞬间等..."></textarea>
+                    </div>
+                    
+                    <div class="param-group">
+                        <label class="param-label">期望片段长度 (秒)</label>
+                        <input type="number" class="param-input" id="expectedClipLength" min="1" value="30" step="1">
+                    </div>
+                    
+                    <div class="param-row">
+                        <div class="param-group">
+                            <label class="param-label">模型温度 (0-2)</label>
+                            <input type="number" class="param-input" id="modelTemperature" min="0" max="2" value="0.7" step="0.1">
+                            <input type="range" class="param-slider" id="temperatureSlider" min="0" max="20" value="7" step="1">
+                        </div>
+                        
+                        <div class="param-group">
+                            <label class="param-label">随机种子</label>
+                            <input type="number" class="param-input" id="randomSeed" min="0" value="42">
+                        </div>
+                    </div>
+                    
+                    <div class="param-group">
+                        <label class="param-label">Top-P (0-1)</label>
+                        <input type="number" class="param-input" id="topP" min="0" max="1" value="0.9" step="0.01">
+                        <input type="range" class="param-slider" id="topPSlider" min="0" max="100" value="90" step="1">
+                    </div>
+                    
+                    <div class="param-group">
+                        <label class="param-label">最大输出长度</label>
+                        <input type="number" class="param-input" id="maxTokens" min="1" max="4096" value="1024">
+                    </div>
+                    
+                    <div class="param-group">
+                        <label class="param-label">关键词权重</label>
+                        <input type="text" class="param-input" id="keywordWeights" placeholder="关键词1:权重1,关键词2:权重2">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 中间主面板 -->
+            <div class="right-main-content custom-content">
+                <!-- 添加标题 -->
+                <div class="main-title">highpre帮您高效处理视频素材</div>
+                
                 <!-- 视频预览区域 -->
-                <div class="video-preview" id="videoPreview"></div>
+                <div class="video-preview card" id="videoPreview"></div>
                 
                 <!-- 处理中提示 -->
                 <div class="processing-text" id="processingText">视频处理中，请稍候...</div>
@@ -393,20 +681,20 @@
                     
                     <!-- 剪辑按钮 -->
                     <div class="analyze-btn-wrapper" id="cutBtnWrapper">
-                        <img src="static/images/cut-icon.png" alt="剪辑视频">
+                        <img src="static/images/analyze-icon.png" alt="剪辑视频">
                     </div>
                 </div>
 
                 <p id="fileName"></p>
 
                 <!-- 剪辑视频展示区域 -->
-                <div id="cutVideoContainer" class="video-preview" style="margin-top: 30px;"></div>
+                <div id="cutVideoContainer" class="video-preview card" style="margin-top: 30px;"></div>
             </div>
             
             <!-- 右侧参数面板 -->
             <div class="right-panel">
                 <!-- FFmpeg 参数面板 -->
-                <div class="ffmpeg-params-panel" id="ffmpegParamsPanel">
+                <div class="ffmpeg-params-panel card custom-panel" id="ffmpegParamsPanel">
                     <div class="panel-header">
                         <div class="panel-title">FFmpeg 参数设置</div>
                     </div>
@@ -489,7 +777,7 @@
                     <button class="reset-btn" id="resetParamsBtn">重置为默认值</button>
                 </div>
                 <!-- 文本显示区域 -->
-                <textarea class="text-display" id="textDisplay" placeholder="处理信息将显示在这里..."></textarea>
+                <textarea class="text-display card" id="textDisplay" placeholder="处理信息将显示在这里..."></textarea>
             </div>
         </div>
     </div>
@@ -534,6 +822,19 @@
             // 时间参数元素
             const startTime = document.getElementById('startTime');
             const endTime = document.getElementById('endTime');
+            
+            // 模型参数元素
+            const modelSource = document.getElementById('modelSource');
+            const modelSelection = document.getElementById('modelSelection');
+            const editingRequirements = document.getElementById('editingRequirements');
+            const expectedClipLength = document.getElementById('expectedClipLength');
+            const modelTemperature = document.getElementById('modelTemperature');
+            const temperatureSlider = document.getElementById('temperatureSlider');
+            const randomSeed = document.getElementById('randomSeed');
+            const topP = document.getElementById('topP');
+            const topPSlider = document.getElementById('topPSlider');
+            const maxTokens = document.getElementById('maxTokens');
+            const keywordWeights = document.getElementById('keywordWeights');
 
             // 状态变量
             let currentVideo = null;
@@ -550,6 +851,19 @@
                 otherParams: '',
                 startTime: 0,
                 endTime: 10
+            };
+            
+            // 模型参数对象
+            let modelParams = {
+                source: 'local',
+                model: 'qwen2.5vl:3b',
+                requirements: '',
+                clipLength: 30,
+                temperature: 0.7,
+                seed: 42,
+                topP: 0.9,
+                maxTokens: 1024,
+                keywords: ''
             };
 
             // 初始时禁用分析按钮和剪辑按钮
@@ -716,6 +1030,57 @@
                 ffmpegParams.otherParams = otherParams.value;
             });
             
+            // 模型参数同步
+            modelSource.addEventListener('change', function() {
+                modelParams.source = modelSource.value;
+            });
+
+            modelSelection.addEventListener('change', function() {
+                modelParams.model = modelSelection.value;
+            });
+
+            editingRequirements.addEventListener('input', function() {
+                modelParams.requirements = editingRequirements.value;
+            });
+
+            expectedClipLength.addEventListener('input', function() {
+                modelParams.clipLength = parseInt(expectedClipLength.value) || 30;
+            });
+
+            // 温度值同步
+            modelTemperature.addEventListener('input', function() {
+                temperatureSlider.value = parseFloat(modelTemperature.value) * 10;
+                modelParams.temperature = parseFloat(modelTemperature.value);
+            });
+
+            temperatureSlider.addEventListener('input', function() {
+                modelTemperature.value = (temperatureSlider.value / 10).toFixed(1);
+                modelParams.temperature = parseFloat(modelTemperature.value);
+            });
+
+            randomSeed.addEventListener('input', function() {
+                modelParams.seed = parseInt(randomSeed.value) || 42;
+            });
+
+            // Top-P值同步
+            topP.addEventListener('input', function() {
+                topPSlider.value = parseFloat(topP.value) * 100;
+                modelParams.topP = parseFloat(topP.value);
+            });
+
+            topPSlider.addEventListener('input', function() {
+                topP.value = (topPSlider.value / 100).toFixed(2);
+                modelParams.topP = parseFloat(topP.value);
+            });
+
+            maxTokens.addEventListener('input', function() {
+                modelParams.maxTokens = parseInt(maxTokens.value) || 1024;
+            });
+
+            keywordWeights.addEventListener('input', function() {
+                modelParams.keywords = keywordWeights.value;
+            });
+            
             // 重置参数
             resetParamsBtn.addEventListener('click', function() {
                 videoCodec.value = 'libx264';
@@ -749,20 +1114,27 @@
             function callXfyunAPI() {
                 // 显示处理中提示
                 processingText.style.display = 'block';
-                textDisplay.value = "正在请求讯飞星火 AI 分析...\n";
+                textDisplay.value = "正在请求AI分析...\n";
                 
                 // 禁用分析按钮防止重复点击
                 analyzeBtnWrapper.classList.add('disabled');
+                
+                // 准备发送给后端的数据
+                const requestData = {
+                    prompt: editingRequirements.value || "请分析这个视频并提供剪辑建议",
+                    model: modelSelection.value,
+                    temperature: parseFloat(modelTemperature.value),
+                    seed: parseInt(randomSeed.value),
+                    maxTokens: parseInt(maxTokens.value),
+                    modelParams: modelParams
+                };
                 
                 fetch('/chatxfyun', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        prompt: "你好",
-                        model: "4.0Ultra"
-                    })
+                    body: JSON.stringify(requestData)
                 })
                 .then(response => response.json())
                 .then(data => {
@@ -805,6 +1177,7 @@
                     console.error(error);
                 });
             }
+            
             // 在服务器端剪辑视频
             function cutVideoOnServer(start, end, filename) {
                 // 显示进度条和处理中提示
@@ -890,6 +1263,42 @@
                     alert('调用剪辑接口失败: ' + error.message);
                     console.error(error);
                 });
+            }
+            
+            // 空函数预留，供后续开发使用
+            function updateModelSettings() {
+                // TODO: 后续实现模型设置的更新逻辑
+                console.log("模型设置已更新:", modelParams);
+            }
+
+            function resetModelParams() {
+                // 重置模型参数为默认值
+                modelSource.value = 'local';
+                modelSelection.value = 'qwen2.5vl:3b';
+                editingRequirements.value = '';
+                expectedClipLength.value = 30;
+                modelTemperature.value = 0.7;
+                temperatureSlider.value = 7;
+                randomSeed.value = 42;
+                topP.value = 0.9;
+                topPSlider.value = 90;
+                maxTokens.value = 1024;
+                keywordWeights.value = '';
+                
+                // 更新参数对象
+                modelParams = {
+                    source: 'local',
+                    model: 'qwen2.5vl:3b',
+                    requirements: '',
+                    clipLength: 30,
+                    temperature: 0.7,
+                    seed: 42,
+                    topP: 0.9,
+                    maxTokens: 1024,
+                    keywords: ''
+                };
+                
+                textDisplay.value += "模型参数已重置为默认值\n";
             }
         });
     </script>
