@@ -5,6 +5,7 @@ import os
 from werkzeug.utils import secure_filename
 import logging
 import shutil
+from openai import OpenAI
 
 # 配置日志
 logging.basicConfig(level=logging.DEBUG)
@@ -55,7 +56,7 @@ def result():
 @app.route('/chatollama', methods=['POST'])
 def chat_with_ollama():
     data = request.get_json()
-    prompt = data.get('prompt','你好')
+    prompt = data.get('prompt')
     model = data.get('model', 'huihui_ai/qwen2.5-1m-abliterated:latest') 
 
     if not prompt:
@@ -82,6 +83,50 @@ def chat_with_ollama():
             'message': f'调用 Ollama 失败: {str(e)}'
         }), 500
 
+#调用讯飞星火大模型
+@app.route('/chatxfyun', methods=['POST'])
+def chat_with_xfyun():
+    data = request.get_json()
+    prompt = data.get('prompt')
+    model = data.get('model', '4.0Ultra')
+
+    if not prompt:
+        return jsonify({
+            'code': 1001,
+            'message': '缺少 prompt 参数'
+        }), 400
+
+    try:
+        # 初始化讯飞星火客户端
+        client = OpenAI(
+            api_key="EofwojbrKQpYiFdIGBNW:WxSxTTMZBTooLcoiFWEd",
+            base_url='https://spark-api-open.xf-yun.com/v1'
+        )
+        
+        # 生成回复
+        completion = client.chat.completions.create(
+            model=model,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+
+        return jsonify({
+            'code': 0,
+            'message': '成功获取模型回复',
+            'data': {
+                'response': completion.choices[0].message.content.strip()
+            }
+        })
+
+    except Exception as e:
+        return jsonify({
+            'code': 1002,
+            'message': f'调用讯飞星火 API 失败: {str(e)}'
+        }), 500
 @app.route('/cut_video', methods=['POST'])
 def cut_video():
     data = request.get_json()

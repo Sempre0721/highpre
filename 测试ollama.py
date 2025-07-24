@@ -10,7 +10,7 @@ def test_chat_api():
     }
     
     payload = {
-        "prompt": "你好"
+        "prompt": "你好,请分析某电影讲了什么"
     }
 
     try:

@@ -1,4 +1,3 @@
-<!-- 修改后的完整HTML文件 -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -79,7 +78,7 @@
         }
 
         .left-panel {
-            flex: 0 0 60%; /* 左侧占60% */
+            flex: 0 0 60%;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -89,7 +88,7 @@
         }
 
         .right-panel {
-            flex: 0 0 40%; /* 右侧占40% */
+            flex: 0 0 40%;
             display: flex;
             flex-direction: column;
             padding: 0 20px;
@@ -161,7 +160,7 @@
             100% { opacity: 1; }
         }
         
-        /* 添加进度条样式 */
+        /* 进度条样式 */
         .progress-container {
             width: 100%;
             max-width: 600px;
@@ -339,404 +338,209 @@
             resize: vertical;
         }
         
-        /* 隐藏滚动条的样式 */
+        /* 隐藏滚动条 */
         .left-panel::-webkit-scrollbar,
         .right-panel::-webkit-scrollbar {
             width: 0px;
             background: transparent;
         }
         
-        /* 兼容 Firefox */
         .left-panel,
         .right-panel {
             scrollbar-width: none;
-        }
-        
-        /* 兼容 IE/Edge */
-        .left-panel,
-        .right-panel {
             -ms-overflow-style: none;
         }
     </style>
 </head>
 <body>
+    <!-- 欢迎界面 -->
+    <div class="intro" id="intro">
+        <span class="line1" id="line1">欢迎使用</span><br>
+        <span class="line2" id="line2">highpre智能AI剪辑系统</span>
+    </div>
 
-<div class="intro" id="intro">
-    <span class="line1" id="line1">欢迎使用</span><br>
-    <span class="line2" id="line2">highpre智能AI剪辑系统</span>
-</div>
-
-<div class="main-content" id="mainContent">
-    <div class="content-wrapper">
-        <!-- 左侧主面板 -->
-        <div class="left-panel">
-            <!-- 视频预览区域（始终 16:9） -->
-            <div class="video-preview" id="videoPreview"></div>
-            
-            <!-- 处理中提示 -->
-            <div class="processing-text" id="processingText">视频处理中，请稍候...</div>
-            
-            <!-- 进度条 -->
-            <div class="progress-container" id="progressContainer">
-                <div class="progress-bar" id="progressBar"></div>
-            </div>
-            
-            <!-- 错误信息显示 -->
-            <div class="error-message" id="errorMessage"></div>
-
-            <!-- 按钮容器 -->
-            <div class="upload-analyze-container">
-                <!-- 上传按钮 -->
-                <div class="upload-btn-wrapper" id="uploadBtnWrapper">
-                    <img src="static/images/upload-icon.png" alt="选择视频">
-                    <input type="file" accept="video/*" id="videoInput">
-                </div>
-
-                <!-- 分析按钮 -->
-                <div class="analyze-btn-wrapper" id="analyzeBtnWrapper">
-                    <img src="static/images/analyze-icon.png" alt="分析视频">
+    <!-- 主内容区域 -->
+    <div class="main-content" id="mainContent">
+        <div class="content-wrapper">
+            <!-- 左侧主面板 -->
+            <div class="left-panel">
+                <!-- 视频预览区域 -->
+                <div class="video-preview" id="videoPreview"></div>
+                
+                <!-- 处理中提示 -->
+                <div class="processing-text" id="processingText">视频处理中，请稍候...</div>
+                
+                <!-- 进度条 -->
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar" id="progressBar"></div>
                 </div>
                 
-                <!-- 剪辑按钮 -->
-                <div class="analyze-btn-wrapper" id="cutBtnWrapper">
-                    <img src="static/images/cut-icon.png" alt="剪辑视频">
-                </div>
-            </div>
+                <!-- 错误信息显示 -->
+                <div class="error-message" id="errorMessage"></div>
 
-            <p id="fileName"></p>
-
-            <!-- 剪辑视频展示区域 -->
-            <div id="cutVideoContainer" class="video-preview" style="margin-top: 30px;"></div>
-        </div>
-        
-        <!-- 右侧参数面板 -->
-        <div class="right-panel">
-            
-            <!-- FFmpeg 参数面板 -->
-            <div class="ffmpeg-params-panel" id="ffmpegParamsPanel">
-                <div class="panel-header">
-                    <div class="panel-title">FFmpeg 参数设置</div>
-                </div>
-                
-                <div class="param-group">
-                    <label class="param-label">视频编码器 (-c:v)</label>
-                    <select class="param-input" id="videoCodec">
-                        <option value="libx264">libx264 (H.264)</option>
-                        <option value="libx265">libx265 (H.265/HEVC)</option>
-                        <option value="vp9">vp9 (VP9)</option>
-                        <option value="h264_nvenc">h264_nvenc (NVIDIA GPU)</option>
-                    </select>
-                </div>
-                
-                <div class="param-group">
-                    <label class="param-label">音频编码器 (-c:a)</label>
-                    <select class="param-input" id="audioCodec">
-                        <option value="aac">aac</option>
-                        <option value="mp3">mp3</option>
-                        <option value="opus">opus</option>
-                        <option value="vorbis">vorbis</option>
-                    </select>
-                </div>
-                
-                <div class="param-row">
-                    <div class="param-group">
-                        <label class="param-label">质量 (CRF: 0-51)</label>
-                        <input type="number" class="param-input" id="crfValue" min="0" max="51" value="23">
-                        <input type="range" class="param-slider" id="crfSlider" min="0" max="51" value="23">
+                <!-- 按钮容器 -->
+                <div class="upload-analyze-container">
+                    <!-- 上传按钮 -->
+                    <div class="upload-btn-wrapper" id="uploadBtnWrapper">
+                        <img src="static/images/upload-icon.png" alt="选择视频">
+                        <input type="file" accept="video/*" id="videoInput">
                     </div>
-                <div class="param-group">
-                    <label class="param-label">起始时间 (秒)</label>
-                    <input type="number" class="param-input" id="startTime" min="0" value="0" step="0.1">
+
+                    <!-- 分析按钮 -->
+                    <div class="analyze-btn-wrapper" id="analyzeBtnWrapper">
+                        <img src="static/images/analyze-icon.png" alt="分析视频">
+                    </div>
+                    
+                    <!-- 剪辑按钮 -->
+                    <div class="analyze-btn-wrapper" id="cutBtnWrapper">
+                        <img src="static/images/cut-icon.png" alt="剪辑视频">
+                    </div>
                 </div>
-                
-                <div class="param-group">
-                    <label class="param-label">结束时间 (秒)</label>
-                    <input type="number" class="param-input" id="endTime" min="0" value="10" step="0.1">
-                </div>
-                <div class="param-group">
-                    <label class="param-label">编码预设 (-preset)</label>
-                    <select class="param-input" id="presetValue">
-                        <option value="ultrafast">ultrafast</option>
-                        <option value="superfast">superfast</option>
-                        <option value="veryfast">veryfast</option>
-                        <option value="faster">faster</option>
-                        <option value="fast">fast</option>
-                        <option value="medium" selected>medium</option>
-                        <option value="slow">slow</option>
-                        <option value="slower">slower</option>
-                        <option value="veryslow">veryslow</option>
-                    </select>
-                </div>
+
+                <p id="fileName"></p>
+
+                <!-- 剪辑视频展示区域 -->
+                <div id="cutVideoContainer" class="video-preview" style="margin-top: 30px;"></div>
             </div>
-                
-                <div class="advanced-toggle" id="advancedToggle">显示高级参数 ▼</div>
-                
-                <div class="advanced-params" id="advancedParams">
+            
+            <!-- 右侧参数面板 -->
+            <div class="right-panel">
+                <!-- FFmpeg 参数面板 -->
+                <div class="ffmpeg-params-panel" id="ffmpegParamsPanel">
+                    <div class="panel-header">
+                        <div class="panel-title">FFmpeg 参数设置</div>
+                    </div>
+                    
                     <div class="param-group">
-                        <label class="param-label">像素格式 (-pix_fmt)</label>
-                        <select class="param-input" id="pixFmt">
-                            <option value="yuv420p" selected>yuv420p</option>
-                            <option value="yuv422p">yuv422p</option>
-                            <option value="yuv444p">yuv444p</option>
-                            <option value="yuvj420p">yuvj420p</option>
+                        <label class="param-label">视频编码器 (-c:v)</label>
+                        <select class="param-input" id="videoCodec">
+                            <option value="libx264">libx264 (H.264)</option>
+                            <option value="libx265">libx265 (H.265/HEVC)</option>
+                            <option value="vp9">vp9 (VP9)</option>
+                            <option value="h264_nvenc">h264_nvenc (NVIDIA GPU)</option>
                         </select>
                     </div>
                     
                     <div class="param-group">
-                        <label class="param-label">Movflags (-movflags)</label>
-                        <input type="text" class="param-input" id="movFlags" value="+faststart">
+                        <label class="param-label">音频编码器 (-c:a)</label>
+                        <select class="param-input" id="audioCodec">
+                            <option value="aac">aac</option>
+                            <option value="mp3">mp3</option>
+                            <option value="opus">opus</option>
+                            <option value="vorbis">vorbis</option>
+                        </select>
                     </div>
                     
-                    <div class="param-group">
-                        <label class="param-label">其他参数</label>
-                        <input type="text" class="param-input" id="otherParams" placeholder="例如: -b:v 1000k -maxrate 1500k">
+                    <div class="param-row">
+                        <div class="param-group">
+                            <label class="param-label">质量 (CRF: 0-51)</label>
+                            <input type="number" class="param-input" id="crfValue" min="0" max="51" value="23">
+                            <input type="range" class="param-slider" id="crfSlider" min="0" max="51" value="23">
+                        </div>
+                        <div class="param-group">
+                            <label class="param-label">起始时间 (秒)</label>
+                            <input type="number" class="param-input" id="startTime" min="0" value="0" step="0.1">
+                        </div>
+                        
+                        <div class="param-group">
+                            <label class="param-label">结束时间 (秒)</label>
+                            <input type="number" class="param-input" id="endTime" min="0" value="10" step="0.1">
+                        </div>
+                        <div class="param-group">
+                            <label class="param-label">编码预设 (-preset)</label>
+                            <select class="param-input" id="presetValue">
+                                <option value="ultrafast">ultrafast</option>
+                                <option value="superfast">superfast</option>
+                                <option value="veryfast">veryfast</option>
+                                <option value="faster">faster</option>
+                                <option value="fast">fast</option>
+                                <option value="medium" selected>medium</option>
+                                <option value="slow">slow</option>
+                                <option value="slower">slower</option>
+                                <option value="veryslow">veryslow</option>
+                            </select>
+                        </div>
                     </div>
+                    
+                    <div class="advanced-toggle" id="advancedToggle">显示高级参数 ▼</div>
+                    
+                    <div class="advanced-params" id="advancedParams">
+                        <div class="param-group">
+                            <label class="param-label">像素格式 (-pix_fmt)</label>
+                            <select class="param-input" id="pixFmt">
+                                <option value="yuv420p" selected>yuv420p</option>
+                                <option value="yuv422p">yuv422p</option>
+                                <option value="yuv444p">yuv444p</option>
+                                <option value="yuvj420p">yuvj420p</option>
+                            </select>
+                        </div>
+                        
+                        <div class="param-group">
+                            <label class="param-label">Movflags (-movflags)</label>
+                            <input type="text" class="param-input" id="movFlags" value="+faststart">
+                        </div>
+                        
+                        <div class="param-group">
+                            <label class="param-label">其他参数</label>
+                            <input type="text" class="param-input" id="otherParams" placeholder="例如: -b:v 1000k -maxrate 1500k">
+                        </div>
+                    </div>
+                    
+                    <button class="reset-btn" id="resetParamsBtn">重置为默认值</button>
                 </div>
-                
-                <button class="reset-btn" id="resetParamsBtn">重置为默认值</button>
+                <!-- 文本显示区域 -->
+                <textarea class="text-display" id="textDisplay" placeholder="处理信息将显示在这里..."></textarea>
             </div>
-            <!-- 文本显示区域 -->
-            <textarea class="text-display" id="textDisplay" placeholder="处理信息将显示在这里..."></textarea>
-
         </div>
     </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        console.log("DOM 加载完成");
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log("DOM 加载完成");
 
-        const intro = document.querySelector('.intro');
-        const line1 = document.getElementById('line1');
-        const line2 = document.getElementById('line2');
-        const mainContent = document.getElementById('mainContent');
-        const uploadBtnWrapper = document.getElementById('uploadBtnWrapper');
-        const analyzeBtnWrapper = document.getElementById('analyzeBtnWrapper');
-        const cutBtnWrapper = document.getElementById('cutBtnWrapper'); // 新增剪辑按钮
-        const videoInput = document.getElementById('videoInput');
-        const fileName = document.getElementById('fileName');
-        const videoPreview = document.getElementById('videoPreview');
-        const cutVideoContainer = document.getElementById('cutVideoContainer');
-        const progressContainer = document.getElementById('progressContainer');
-        const progressBar = document.getElementById('progressBar');
-        const errorMessage = document.getElementById('errorMessage');
-        const processingText = document.getElementById('processingText');
-        const textDisplay = document.getElementById('textDisplay');
+            // DOM 元素引用
+            const intro = document.querySelector('.intro');
+            const line1 = document.getElementById('line1');
+            const line2 = document.getElementById('line2');
+            const mainContent = document.getElementById('mainContent');
+            const uploadBtnWrapper = document.getElementById('uploadBtnWrapper');
+            const analyzeBtnWrapper = document.getElementById('analyzeBtnWrapper');
+            const cutBtnWrapper = document.getElementById('cutBtnWrapper');
+            const videoInput = document.getElementById('videoInput');
+            const fileName = document.getElementById('fileName');
+            const videoPreview = document.getElementById('videoPreview');
+            const cutVideoContainer = document.getElementById('cutVideoContainer');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const errorMessage = document.getElementById('errorMessage');
+            const processingText = document.getElementById('processingText');
+            const textDisplay = document.getElementById('textDisplay');
 
-        // FFmpeg 参数相关元素
-        const advancedToggle = document.getElementById('advancedToggle');
-        const advancedParams = document.getElementById('advancedParams');
-        const resetParamsBtn = document.getElementById('resetParamsBtn');
-        
-        // 参数输入元素
-        const videoCodec = document.getElementById('videoCodec');
-        const audioCodec = document.getElementById('audioCodec');
-        const crfValue = document.getElementById('crfValue');
-        const crfSlider = document.getElementById('crfSlider');
-        const presetValue = document.getElementById('presetValue');
-        const pixFmt = document.getElementById('pixFmt');
-        const movFlags = document.getElementById('movFlags');
-        const otherParams = document.getElementById('otherParams');
-        
-        // 新增时间参数元素
-        const startTime = document.getElementById('startTime');
-        const endTime = document.getElementById('endTime');
-
-        let currentVideo = null;
-        let selectedFilePath = null; // 存储选中的文件路径
-        
-        // FFmpeg 参数相关变量
-        let ffmpegParams = {
-            videoCodec: 'libx264',
-            audioCodec: 'aac',
-            crf: 23,
-            preset: 'fast',
-            pixFmt: 'yuv420p',
-            movFlags: '+faststart',
-            otherParams: '',
-            startTime: 0,
-            endTime: 10
-        };
-
-        // 初始时禁用分析按钮和剪辑按钮
-        analyzeBtnWrapper.classList.add('disabled');
-        cutBtnWrapper.classList.add('disabled');
-
-        // 显示 intro 动画
-        setTimeout(() => {
-            intro.style.opacity = 1;
-        }, 100);
-
-        // 动画结束后隐藏 intro，显示主内容
-        setTimeout(() => {
-            intro.style.opacity = 0;
-            intro.style.pointerEvents = 'none';
-
-            // 恢复背景亮度
-            document.body.style.background = 'url("/static/images/background.jpg") no-repeat center center fixed';
-            document.body.style.backgroundSize = 'cover';
-
-            // 显示主内容
-            mainContent.style.display = 'block';
-            mainContent.style.opacity = '1';
-        }, 4000);
-
-        // 文件选择后的回调
-        videoInput.addEventListener('change', function () {
-            const file = videoInput.files[0];
-            if (!file) return;
-
-            fileName.textContent = '已选择视频: ' + file.name;
-
-            // 清除旧视频
-            if (currentVideo) {
-                currentVideo.pause();
-                currentVideo.srcObject = null;
-                currentVideo = null;
-            }
-
-            // 创建文件访问 URL 用于预览
-            const videoURL = URL.createObjectURL(file);
-            const videoElement = document.createElement('video');
-            videoElement.src = videoURL;
-            videoElement.controls = true;
-            videoElement.autoplay = true;
-            videoElement.loop = false;
-            videoElement.muted = true;
-
-            videoPreview.innerHTML = '';
-            videoPreview.appendChild(videoElement);
-            currentVideo = videoElement;
-
-            // 启用分析按钮和剪辑按钮
-            analyzeBtnWrapper.classList.remove('disabled');
-            cutBtnWrapper.classList.remove('disabled');
+            // FFmpeg 参数相关元素
+            const advancedToggle = document.getElementById('advancedToggle');
+            const advancedParams = document.getElementById('advancedParams');
+            const resetParamsBtn = document.getElementById('resetParamsBtn');
             
-            // 保存文件路径信息（用于后续处理）
-            selectedFilePath = file.name;
+            // 参数输入元素
+            const videoCodec = document.getElementById('videoCodec');
+            const audioCodec = document.getElementById('audioCodec');
+            const crfValue = document.getElementById('crfValue');
+            const crfSlider = document.getElementById('crfSlider');
+            const presetValue = document.getElementById('presetValue');
+            const pixFmt = document.getElementById('pixFmt');
+            const movFlags = document.getElementById('movFlags');
+            const otherParams = document.getElementById('otherParams');
             
-            // 隐藏错误信息
-            errorMessage.style.display = 'none';
+            // 时间参数元素
+            const startTime = document.getElementById('startTime');
+            const endTime = document.getElementById('endTime');
+
+            // 状态变量
+            let currentVideo = null;
+            let selectedFilePath = null;
             
-            // 更新结束时间为视频时长
-            videoElement.addEventListener('loadedmetadata', function() {
-                endTime.value = Math.floor(videoElement.duration * 10) / 10;
-                ffmpegParams.endTime = endTime.value;
-            });
-        });
-
-        // 分析按钮点击事件 - 调用 Ollama 接口
-        analyzeBtnWrapper.addEventListener('click', function () {
-            // 如果按钮被禁用，则不执行任何操作
-            if (analyzeBtnWrapper.classList.contains('disabled')) {
-                return;
-            }
-
-            if (!currentVideo) {
-                alert('请先选择视频');
-                return;
-            }
-
-            // 调用 Ollama 接口
-            callOllamaAPI();
-        });
-        
-        // 剪辑按钮点击事件 - 执行剪辑功能
-        cutBtnWrapper.addEventListener('click', function () {
-            // 如果按钮被禁用，则不执行任何操作
-            if (cutBtnWrapper.classList.contains('disabled')) {
-                return;
-            }
-
-            if (!currentVideo) {
-                alert('请先选择视频');
-                return;
-            }
-
-            // 获取用户设置的时间参数
-            const start = parseFloat(startTime.value);
-            const end = parseFloat(endTime.value);
-            
-            if (isNaN(start) || isNaN(end) || start >= end) {
-                alert('请设置有效的起始时间和结束时间');
-                return;
-            }
-
-            // 调用服务器端剪辑功能
-            cutVideoOnServer(start, end, selectedFilePath);
-        });
-
-        // 切换高级参数显示
-        advancedToggle.addEventListener('click', function() {
-            if (advancedParams.style.display === 'none') {
-                advancedParams.style.display = 'block';
-                advancedToggle.textContent = '隐藏高级参数 ▲';
-            } else {
-                advancedParams.style.display = 'none';
-                advancedToggle.textContent = '显示高级参数 ▼';
-            }
-        });
-        
-        // CRF 值同步
-        crfValue.addEventListener('input', function() {
-            crfSlider.value = crfValue.value;
-            ffmpegParams.crf = parseInt(crfValue.value);
-        });
-        
-        crfSlider.addEventListener('input', function() {
-            crfValue.value = crfSlider.value;
-            ffmpegParams.crf = parseInt(crfSlider.value);
-        });
-        
-        // 时间参数同步
-        startTime.addEventListener('input', function() {
-            ffmpegParams.startTime = parseFloat(startTime.value) || 0;
-        });
-        
-        endTime.addEventListener('input', function() {
-            ffmpegParams.endTime = parseFloat(endTime.value) || 10;
-        });
-        
-        // 其他参数同步
-        videoCodec.addEventListener('change', function() {
-            ffmpegParams.videoCodec = videoCodec.value;
-        });
-        
-        audioCodec.addEventListener('change', function() {
-            ffmpegParams.audioCodec = audioCodec.value;
-        });
-        
-        presetValue.addEventListener('change', function() {
-            ffmpegParams.preset = presetValue.value;
-        });
-        
-        pixFmt.addEventListener('change', function() {
-            ffmpegParams.pixFmt = pixFmt.value;
-        });
-        
-        movFlags.addEventListener('input', function() {
-            ffmpegParams.movFlags = movFlags.value;
-        });
-        
-        otherParams.addEventListener('input', function() {
-            ffmpegParams.otherParams = otherParams.value;
-        });
-        
-        // 重置参数
-        resetParamsBtn.addEventListener('click', function() {
-            videoCodec.value = 'libx264';
-            audioCodec.value = 'aac';
-            crfValue.value = 23;
-            crfSlider.value = 23;
-            presetValue.value = 'fast';
-            pixFmt.value = 'yuv420p';
-            movFlags.value = '+faststart';
-            otherParams.value = '';
-            startTime.value = 0;
-            endTime.value = 10;
-            
-            // 更新参数对象
-            ffmpegParams = {
+            // FFmpeg 参数对象
+            let ffmpegParams = {
                 videoCodec: 'libx264',
                 audioCodec: 'aac',
                 crf: 23,
@@ -747,160 +551,347 @@
                 startTime: 0,
                 endTime: 10
             };
-            
-            textDisplay.value += "参数已重置为默认值\n";
-        });
 
-        // 调用 Ollama API
-        function callOllamaAPI() {
-            // 显示处理中提示
-            processingText.style.display = 'block';
-            textDisplay.value = "正在请求 AI 分析...\n";
-            
-            // 禁用分析按钮防止重复点击
+            // 初始时禁用分析按钮和剪辑按钮
             analyzeBtnWrapper.classList.add('disabled');
-            
-            fetch('/chatollama', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    prompt: "你好"
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // 恢复分析按钮
-                analyzeBtnWrapper.classList.remove('disabled');
-                
-                // 隐藏处理中提示
-                processingText.style.display = 'none';
-                
-                // 直接显示原始返回数据
-                textDisplay.value += "AI 响应原始数据:\n" + JSON.stringify(data, null, 2) + "\n";
-                
-                if (data.code === 0) {
-                    console.log('AI 分析成功:', data);
-                    // 如果有响应内容，则显示
-                    if (data.data && data.data.response) {
-                        textDisplay.value += "AI 分析结果:\n" + data.data.response + "\n";
-                    }
-                    
-                    // 隐藏错误信息
-                    errorMessage.style.display = 'none';
-                } else {
-                    // 显示错误信息
-                    errorMessage.textContent = `AI 分析失败: ${data.message}`;
-                    errorMessage.style.display = 'block';
-                    textDisplay.value += "AI 分析失败: " + data.message + "\n";
-                    console.error('AI 分析失败:', data);
-                    alert('AI 分析失败: ' + data.message);
-                }
-            })
-    .catch(error => {
-        // 恢复分析按钮
-        analyzeBtnWrapper.classList.remove('disabled');
-        
-        // 隐藏处理中提示
-        processingText.style.display = 'none';
-        
-        errorMessage.textContent = `网络错误: ${error.message}`;
-        errorMessage.style.display = 'block';
-        textDisplay.value += "网络错误: " + error.message + "\n";
-        textDisplay.value += "错误详情: " + JSON.stringify(error, null, 2) + "\n";
-        alert('调用 AI 分析接口失败: ' + error.message);
-        console.error(error);
-    });
-}
-        // 在服务器端剪辑视频
-        function cutVideoOnServer(start, end, filename) {
-            // 显示进度条和处理中提示
-            progressContainer.style.display = 'block';
-            processingText.style.display = 'block';
-            progressBar.style.width = '0%';
-            textDisplay.value = "开始处理视频...\n";
-            
-            // 禁用剪辑按钮防止重复点击
             cutBtnWrapper.classList.add('disabled');
-            
-            // 模拟进度条动画
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += Math.random() * 10;
-                if (progress >= 100) {
-                    progress = 100;
-                    clearInterval(interval);
-                }
-                progressBar.style.width = progress + '%';
-            }, 200);
 
-            fetch('/cut_video', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    start: start.toFixed(2),
-                    end: end.toFixed(2),
-                    path: '/videos/input', // 服务器端输入路径
-                    name: filename,
-                    ffmpegParams: ffmpegParams  // 添加 ffmpeg 参数
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                // 停止进度条动画并完成
-                clearInterval(interval);
-                progressBar.style.width = '100%';
+            // 显示欢迎动画
+            setTimeout(() => {
+                intro.style.opacity = 1;
+            }, 100);
+
+            // 动画结束后显示主内容
+            setTimeout(() => {
+                intro.style.opacity = 0;
+                intro.style.pointerEvents = 'none';
+
+                // 恢复背景亮度
+                document.body.style.background = 'url("/static/images/background.jpg") no-repeat center center fixed';
+                document.body.style.backgroundSize = 'cover';
+
+                // 显示主内容
+                mainContent.style.display = 'block';
+                mainContent.style.opacity = '1';
+            }, 4000);
+
+            // 文件选择处理
+            videoInput.addEventListener('change', function () {
+                const file = videoInput.files[0];
+                if (!file) return;
+
+                fileName.textContent = '已选择视频: ' + file.name;
+
+                // 清除旧视频
+                if (currentVideo) {
+                    currentVideo.pause();
+                    currentVideo.srcObject = null;
+                    currentVideo = null;
+                }
+
+                // 创建文件访问 URL 用于预览
+                const videoURL = URL.createObjectURL(file);
+                const videoElement = document.createElement('video');
+                videoElement.src = videoURL;
+                videoElement.controls = true;
+                videoElement.autoplay = true;
+                videoElement.loop = false;
+                videoElement.muted = true;
+
+                videoPreview.innerHTML = '';
+                videoPreview.appendChild(videoElement);
+                currentVideo = videoElement;
+
+                // 启用分析按钮和剪辑按钮
+                analyzeBtnWrapper.classList.remove('disabled');
+                cutBtnWrapper.classList.remove('disabled');
                 
-                // 延迟隐藏进度条，让用户看到完成状态
-                setTimeout(() => {
+                // 保存文件路径信息
+                selectedFilePath = file.name;
+                
+                // 隐藏错误信息
+                errorMessage.style.display = 'none';
+                
+                // 更新结束时间为视频时长
+                videoElement.addEventListener('loadedmetadata', function() {
+                    endTime.value = Math.floor(videoElement.duration * 10) / 10;
+                    ffmpegParams.endTime = endTime.value;
+                });
+            });
+
+            // 分析按钮点击事件 - 调用讯飞星火 API
+            analyzeBtnWrapper.addEventListener('click', function () {
+                // 如果按钮被禁用，则不执行任何操作
+                if (analyzeBtnWrapper.classList.contains('disabled')) {
+                    return;
+                }
+
+                if (!currentVideo) {
+                    alert('请先选择视频');
+                    return;
+                }
+
+                // 调用讯飞星火 API
+                callXfyunAPI();
+            });
+            
+            // 剪辑按钮点击事件
+            cutBtnWrapper.addEventListener('click', function () {
+                // 如果按钮被禁用，则不执行任何操作
+                if (cutBtnWrapper.classList.contains('disabled')) {
+                    return;
+                }
+
+                if (!currentVideo) {
+                    alert('请先选择视频');
+                    return;
+                }
+
+                // 获取用户设置的时间参数
+                const start = parseFloat(startTime.value);
+                const end = parseFloat(endTime.value);
+                
+                if (isNaN(start) || isNaN(end) || start >= end) {
+                    alert('请设置有效的起始时间和结束时间');
+                    return;
+                }
+
+                // 调用服务器端剪辑功能
+                cutVideoOnServer(start, end, selectedFilePath);
+            });
+
+            // 切换高级参数显示
+            advancedToggle.addEventListener('click', function() {
+                if (advancedParams.style.display === 'none') {
+                    advancedParams.style.display = 'block';
+                    advancedToggle.textContent = '隐藏高级参数 ▲';
+                } else {
+                    advancedParams.style.display = 'none';
+                    advancedToggle.textContent = '显示高级参数 ▼';
+                }
+            });
+            
+            // CRF 值同步
+            crfValue.addEventListener('input', function() {
+                crfSlider.value = crfValue.value;
+                ffmpegParams.crf = parseInt(crfValue.value);
+            });
+            
+            crfSlider.addEventListener('input', function() {
+                crfValue.value = crfSlider.value;
+                ffmpegParams.crf = parseInt(crfSlider.value);
+            });
+            
+            // 时间参数同步
+            startTime.addEventListener('input', function() {
+                ffmpegParams.startTime = parseFloat(startTime.value) || 0;
+            });
+            
+            endTime.addEventListener('input', function() {
+                ffmpegParams.endTime = parseFloat(endTime.value) || 10;
+            });
+            
+            // 其他参数同步
+            videoCodec.addEventListener('change', function() {
+                ffmpegParams.videoCodec = videoCodec.value;
+            });
+            
+            audioCodec.addEventListener('change', function() {
+                ffmpegParams.audioCodec = audioCodec.value;
+            });
+            
+            presetValue.addEventListener('change', function() {
+                ffmpegParams.preset = presetValue.value;
+            });
+            
+            pixFmt.addEventListener('change', function() {
+                ffmpegParams.pixFmt = pixFmt.value;
+            });
+            
+            movFlags.addEventListener('input', function() {
+                ffmpegParams.movFlags = movFlags.value;
+            });
+            
+            otherParams.addEventListener('input', function() {
+                ffmpegParams.otherParams = otherParams.value;
+            });
+            
+            // 重置参数
+            resetParamsBtn.addEventListener('click', function() {
+                videoCodec.value = 'libx264';
+                audioCodec.value = 'aac';
+                crfValue.value = 23;
+                crfSlider.value = 23;
+                presetValue.value = 'fast';
+                pixFmt.value = 'yuv420p';
+                movFlags.value = '+faststart';
+                otherParams.value = '';
+                startTime.value = 0;
+                endTime.value = 10;
+                
+                // 更新参数对象
+                ffmpegParams = {
+                    videoCodec: 'libx264',
+                    audioCodec: 'aac',
+                    crf: 23,
+                    preset: 'fast',
+                    pixFmt: 'yuv420p',
+                    movFlags: '+faststart',
+                    otherParams: '',
+                    startTime: 0,
+                    endTime: 10
+                };
+                
+                textDisplay.value += "参数已重置为默认值\n";
+            });
+
+            // 调用讯飞星火 API
+            function callXfyunAPI() {
+                // 显示处理中提示
+                processingText.style.display = 'block';
+                textDisplay.value = "正在请求讯飞星火 AI 分析...\n";
+                
+                // 禁用分析按钮防止重复点击
+                analyzeBtnWrapper.classList.add('disabled');
+                
+                fetch('/chatxfyun', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt: "你好",
+                        model: "4.0Ultra"
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // 恢复分析按钮
+                    analyzeBtnWrapper.classList.remove('disabled');
+                    
+                    // 隐藏处理中提示
+                    processingText.style.display = 'none';
+                    
+                    // 显示原始返回数据
+                    ///textDisplay.value += "AI 响应原始数据:\n" + JSON.stringify(data, null, 2) + "\n";
+                    
+                    if (data.code === 0) {
+                        console.log('AI 分析成功:', data);
+                        // 提取并显示实际的分析结果
+                        if (data.data && data.data.response) {
+                            textDisplay.value += "AI 分析结果:\n" + data.data.response + "\n";
+                        }
+                        
+                        // 隐藏错误信息
+                        errorMessage.style.display = 'none';
+                    } else {
+                        // 显示错误信息
+                        errorMessage.textContent = `AI 分析失败: ${data.message}`;
+                        errorMessage.style.display = 'block';
+                        textDisplay.value += "AI 分析失败: " + data.message + "\n";
+                        console.error('AI 分析失败:', data);
+                        alert('AI 分析失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    // 恢复分析按钮
+                    analyzeBtnWrapper.classList.remove('disabled');
+                    
+                    errorMessage.textContent = `网络错误: ${error.message}`;
+                    errorMessage.style.display = 'block';
+                    textDisplay.value += "网络错误: " + error.message + "\n";
+                    textDisplay.value += "错误详情: " + JSON.stringify(error, null, 2) + "\n";
+                    alert('调用 AI 分析接口失败: ' + error.message);
+                    console.error(error);
+                });
+            }
+            // 在服务器端剪辑视频
+            function cutVideoOnServer(start, end, filename) {
+                // 显示进度条和处理中提示
+                progressContainer.style.display = 'block';
+                processingText.style.display = 'block';
+                progressBar.style.width = '0%';
+                textDisplay.value = "开始处理视频...\n";
+                
+                // 禁用剪辑按钮防止重复点击
+                cutBtnWrapper.classList.add('disabled');
+                
+                // 模拟进度条动画
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += Math.random() * 10;
+                    if (progress >= 100) {
+                        progress = 100;
+                        clearInterval(interval);
+                    }
+                    progressBar.style.width = progress + '%';
+                }, 200);
+
+                fetch('/cut_video', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        start: start.toFixed(2),
+                        end: end.toFixed(2),
+                        path: '/videos/input',
+                        name: filename,
+                        ffmpegParams: ffmpegParams
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // 停止进度条动画并完成
+                    clearInterval(interval);
+                    progressBar.style.width = '100%';
+                    
+                    // 延迟隐藏进度条，让用户看到完成状态
+                    setTimeout(() => {
+                        progressContainer.style.display = 'none';
+                        processingText.style.display = 'none';
+                    }, 500);
+                    
+                    // 恢复剪辑按钮
+                    cutBtnWrapper.classList.remove('disabled');
+                    
+                    if (data.code === 0) {
+                        console.log('剪辑成功:', data.data.output);
+                        textDisplay.value += "视频剪辑成功!\n输出路径: " + data.data.output + "\n";
+                        
+                        // 隐藏错误信息
+                        errorMessage.style.display = 'none';
+                        
+                        // 打开结果页面
+                        window.open('http://127.0.0.1:5839/result', '_blank');
+                    } else {
+                        // 显示错误信息
+                        errorMessage.textContent = `剪辑失败: ${data.message}\n${data.error || ''}`;
+                        errorMessage.style.display = 'block';
+                        textDisplay.value += "剪辑失败: " + data.message + "\n";
+                        console.error('剪辑失败:', data);
+                        alert('剪辑失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    // 停止进度条动画
+                    clearInterval(interval);
+                    
+                    // 隐藏进度条
                     progressContainer.style.display = 'none';
                     processingText.style.display = 'none';
-                }, 500);
-                
-                // 恢复剪辑按钮
-                cutBtnWrapper.classList.remove('disabled');
-                
-                if (data.code === 0) {
-                    console.log('剪辑成功:', data.data.output);
-                    textDisplay.value += "视频剪辑成功!\n输出路径: " + data.data.output + "\n";
                     
-                    // 隐藏错误信息
-                    errorMessage.style.display = 'none';
+                    // 恢复剪辑按钮
+                    cutBtnWrapper.classList.remove('disabled');
                     
-                    // 直接打开result.html页面，而不是路由跳转
-                    window.open('http://127.0.0.1:5839/result', '_blank');
-                } else {
-                    // 显示错误信息
-                    errorMessage.textContent = `剪辑失败: ${data.message}\n${data.error || ''}`;
+                    errorMessage.textContent = `网络错误: ${error.message}`;
                     errorMessage.style.display = 'block';
-                    textDisplay.value += "剪辑失败: " + data.message + "\n";
-                    console.error('剪辑失败:', data);
-                    alert('剪辑失败: ' + data.message);
-                }
-            })
-            .catch(error => {
-                // 停止进度条动画
-                clearInterval(interval);
-                
-                // 隐藏进度条
-                progressContainer.style.display = 'none';
-                processingText.style.display = 'none';
-                
-                // 恢复剪辑按钮
-                cutBtnWrapper.classList.remove('disabled');
-                
-                errorMessage.textContent = `网络错误: ${error.message}`;
-                errorMessage.style.display = 'block';
-                textDisplay.value += "网络错误: " + error.message + "\n";
-                alert('调用剪辑接口失败: ' + error.message);
-                console.error(error);
-            });
-        }
-    });
-</script>
-
+                    textDisplay.value += "网络错误: " + error.message + "\n";
+                    alert('调用剪辑接口失败: ' + error.message);
+                    console.error(error);
+                });
+            }
+        });
+    </script>
 </body>
 </html>
