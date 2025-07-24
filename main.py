@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 import ollama
 import subprocess
 import os
@@ -34,6 +34,12 @@ app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
 # 确保文件夹存在
 os.makedirs(INPUT_FOLDER, exist_ok=True)
 os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+
+# 添加静态文件路由以访问输出视频
+@app.route('/videos/output/<path:filename>')
+def serve_output_video(filename):
+    """提供输出视频文件访问"""
+    return send_from_directory(app.config['OUTPUT_FOLDER'], filename)
 
 # 首页路由
 @app.route('/')
@@ -83,6 +89,7 @@ def cut_video():
     end = data.get('end')
     path = data.get('path')  # 本地视频路径
     name = data.get('name')
+    ffmpeg_params = data.get('ffmpegParams', {})  # 获取 FFmpeg 参数
 
     # 参数校验
     if None in [start, end, path, name]:
@@ -111,22 +118,50 @@ def cut_video():
             'message': f'视频文件不存在: {input_path}'
         }), 404
 
-    # 构建 ffmpeg 命令，使用 H.264 编码确保浏览器兼容性
+    # 构建 ffmpeg 命令，使用用户设置的参数
     duration = float(end) - float(start)
     command = [
         'ffmpeg',
         '-i', input_path,
         '-ss', str(start),
-        '-t', str(duration),
-        '-c:v', 'libx264',      # 使用 H.264 视频编码
-        '-c:a', 'aac',          # 使用 AAC 音频编码
-        '-strict', 'experimental',
-        '-preset', 'fast',      # 编码速度预设
-        '-crf', '23',           # 视频质量 (18-28 是合理范围)
-        '-pix_fmt', 'yuv420p',  # 像素格式，确保兼容性
-        '-movflags', '+faststart',  # 优化 Web 播放
-        output_path
+        '-t', str(duration)
     ]
+    
+    # 添加视频编码器参数
+    video_codec = ffmpeg_params.get('videoCodec', 'libx264')
+    command.extend(['-c:v', video_codec])
+    
+    # 添加音频编码器参数
+    audio_codec = ffmpeg_params.get('audioCodec', 'aac')
+    command.extend(['-c:a', audio_codec])
+    
+    # 添加其他参数
+    if video_codec == 'libx264':
+        command.extend(['-strict', 'experimental'])
+    
+    # 添加预设参数
+    preset = ffmpeg_params.get('preset', 'fast')
+    command.extend(['-preset', preset])
+    
+    # 添加CRF参数
+    crf = ffmpeg_params.get('crf', 23)
+    command.extend(['-crf', str(crf)])
+    
+    # 添加像素格式参数
+    pix_fmt = ffmpeg_params.get('pixFmt', 'yuv420p')
+    command.extend(['-pix_fmt', pix_fmt])
+    
+    # 添加movflags参数
+    mov_flags = ffmpeg_params.get('movFlags', '+faststart')
+    command.extend(['-movflags', mov_flags])
+    
+    # 添加其他自定义参数
+    other_params = ffmpeg_params.get('otherParams', '')
+    if other_params:
+        command.extend(other_params.split())
+    
+    # 输出文件路径
+    command.append(output_path)
 
     try:
         # 记录要执行的命令
@@ -170,7 +205,7 @@ def cut_video():
             'code': 0,
             'message': '视频剪切成功',
             'data': {
-                'output': '/' + web_output_path  # 添加前缀以便在网页中访问
+                'output': f'/videos/output/{output_filename}'  # 更新为正确的访问路径
             }
         })
 
@@ -180,5 +215,6 @@ def cut_video():
             'code': 500,
             'message': f'执行剪切时发生异常: {str(e)}'
         }), 500
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5839, debug=True)

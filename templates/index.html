@@ -22,23 +22,9 @@
             background-size: cover;
             color: white;
             font-family: 'MiSans', 'Segoe UI', sans-serif;
-            overflow: hidden;
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            overflow: hidden;
             position: relative;
-        }
-
-        body::after {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            transition: background 1s ease;
         }
 
         .intro, .main-content {
@@ -54,7 +40,7 @@
             text-align: center;
             opacity: 0;
             transition: opacity 1s ease;
-            color: #39dcbb; /* 修改欢迎文字颜色 */
+            color: #39dcbb;
         }
 
         .line1, .line2 {
@@ -77,19 +63,42 @@
 
         .main-content {
             display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            height: 100%;
+            width: 85vw; 
+            margin: 0 auto; 
+            overflow: hidden;
+        }
+
+        .content-wrapper {
+            display: flex;
+            height: 100%;
+            padding: 20px 0;
+            box-sizing: border-box;
+        }
+
+        .left-panel {
+            flex: 0 0 60%; /* 左侧占60% */
+            display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            text-align: center;
-            opacity: 0;
-            transition: opacity 0.5s ease;
-            height: 85vh;
-            width: 100%;
+            padding: 0 20px;
+            overflow-y: auto;
+        }
+
+        .right-panel {
+            flex: 0 0 40%; /* 右侧占40% */
+            display: flex;
+            flex-direction: column;
+            padding: 0 20px;
+            overflow-y: auto;
         }
 
         /* 视频预览区域（始终 16:9） */
         .video-preview {
-            width: 80%;
+            width: 100%;
             max-width: 600px;
             aspect-ratio: 16 / 9;
             background-color: #111;
@@ -113,15 +122,14 @@
             justify-content: center;
             align-items: center;
             gap: 40px;
-            margin-top: 30px;
-            z-index: 2;
+            margin: 30px 0;
         }
 
         .upload-btn-wrapper,
         .analyze-btn-wrapper {
             position: relative;
-            width: 100px;
-            height: 100px;
+            width: 10vw;
+            height: 100%;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -155,12 +163,12 @@
         
         /* 添加进度条样式 */
         .progress-container {
-            width: 80%;
+            width: 100%;
             max-width: 600px;
             height: 20px;
             background-color: #333;
             border-radius: 10px;
-            margin: 10px auto;
+            margin: 10px 0;
             display: none;
         }
         
@@ -169,7 +177,7 @@
             background-color: #4CAF50;
             border-radius: 10px;
             width: 0%;
-            transition: width 0.3s ease; /* 添加过渡动画 */
+            transition: width 0.3s ease;
         }
         
         /* 禁用按钮样式 */
@@ -181,6 +189,7 @@
         /* 文件名文字颜色 */
         #fileName {
             color: #39dcbb;
+            margin: 10px 0;
         }
         
         /* 错误信息样式 */
@@ -195,7 +204,7 @@
             text-align: left;
             font-family: monospace;
             font-size: 12px;
-            max-width: 80%;
+            max-width: 100%;
             overflow: auto;
         }
         
@@ -205,6 +214,140 @@
             font-size: 18px;
             margin: 10px 0;
             display: none;
+        }
+        
+        /* FFmpeg 参数面板样式 */
+        .ffmpeg-params-panel {
+            background-color: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 15px;
+            margin-top: 15vh;
+            border: 1px solid #39dcbb;
+            width: 50%;
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #39dcbb;
+        }
+        
+        .panel-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .toggle-params {
+            background-color: #39dcbb;
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'MiSans', sans-serif;
+            font-weight: bold;
+        }
+        
+        .param-group {
+            margin-bottom: 15px;
+        }
+        
+        .param-label {
+            display: block;
+            margin-bottom: 5px;
+            color: white;
+        }
+        
+        .param-input {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #39dcbb;
+            background-color: #333;
+            color: white;
+            box-sizing: border-box;
+        }
+        
+        .param-slider {
+            width: 100%;
+            margin-top: 5px;
+        }
+        
+        .param-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .param-row .param-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .advanced-toggle {
+            color: #39dcbb;
+            cursor: pointer;
+            text-align: center;
+            margin: 10px 0;
+            font-size: 14px;
+        }
+        
+        .advanced-params {
+            display: none;
+        }
+        
+        .reset-btn {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'MiSans', sans-serif;
+            font-weight: bold;
+            margin-top: 10px;
+            width: 100%;
+        }
+        
+        .reset-btn:hover {
+            background-color: #ff5252;
+        }
+        
+        /* 文本显示区域 */
+        .text-display {
+            width: 60%;
+            height: 150px;
+            background-color: rgba(0, 0, 0, 0.7);
+            border: 1px solid #39dcbb;
+            border-radius: 10px;
+            padding: 10px;
+            margin: 10px 0;
+            color: white;
+            font-family: 'MiSans', monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #39dcbb;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #2db09d;
         }
     </style>
 </head>
@@ -216,38 +359,126 @@
 </div>
 
 <div class="main-content" id="mainContent">
-    <!-- 视频预览区域（始终 16:9） -->
-    <div class="video-preview" id="videoPreview"></div>
-    
-    <!-- 处理中提示 -->
-    <div class="processing-text" id="processingText">视频处理中，请稍候...</div>
-    
-    <!-- 进度条 -->
-    <div class="progress-container" id="progressContainer">
-        <div class="progress-bar" id="progressBar"></div>
-    </div>
-    
-    <!-- 错误信息显示 -->
-    <div class="error-message" id="errorMessage"></div>
+    <div class="content-wrapper">
+        <!-- 左侧主面板 -->
+        <div class="left-panel">
+            <!-- 视频预览区域（始终 16:9） -->
+            <div class="video-preview" id="videoPreview"></div>
+            
+            <!-- 处理中提示 -->
+            <div class="processing-text" id="processingText">视频处理中，请稍候...</div>
+            
+            <!-- 进度条 -->
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+            
+            <!-- 错误信息显示 -->
+            <div class="error-message" id="errorMessage"></div>
 
-    <!-- 按钮容器 -->
-    <div class="upload-analyze-container">
-        <!-- 上传按钮 -->
-        <div class="upload-btn-wrapper" id="uploadBtnWrapper">
-            <img src="static/images/upload-icon.png" alt="选择视频">
-            <input type="file" accept="video/*" id="videoInput">
+            <!-- 按钮容器 -->
+            <div class="upload-analyze-container">
+                <!-- 上传按钮 -->
+                <div class="upload-btn-wrapper" id="uploadBtnWrapper">
+                    <img src="static/images/upload-icon.png" alt="选择视频">
+                    <input type="file" accept="video/*" id="videoInput">
+                </div>
+
+                <!-- 分析按钮 -->
+                <div class="analyze-btn-wrapper" id="analyzeBtnWrapper">
+                    <img src="static/images/analyze-icon.png" alt="分析视频">
+                </div>
+            </div>
+
+            <p id="fileName"></p>
+
+            <!-- 剪辑视频展示区域 -->
+            <div id="cutVideoContainer" class="video-preview" style="margin-top: 30px;"></div>
         </div>
+        
+        <!-- 右侧参数面板 -->
+        <div class="right-panel">
+            
+            <!-- FFmpeg 参数面板 -->
+            <div class="ffmpeg-params-panel" id="ffmpegParamsPanel">
+                <div class="panel-header">
+                    <div class="panel-title">FFmpeg 参数设置</div>
+                </div>
+                
+                <div class="param-group">
+                    <label class="param-label">视频编码器 (-c:v)</label>
+                    <select class="param-input" id="videoCodec">
+                        <option value="libx264">libx264 (H.264)</option>
+                        <option value="libx265">libx265 (H.265/HEVC)</option>
+                        <option value="vp9">vp9 (VP9)</option>
+                        <option value="h264_nvenc">h264_nvenc (NVIDIA GPU)</option>
+                    </select>
+                </div>
+                
+                <div class="param-group">
+                    <label class="param-label">音频编码器 (-c:a)</label>
+                    <select class="param-input" id="audioCodec">
+                        <option value="aac">aac</option>
+                        <option value="mp3">mp3</option>
+                        <option value="opus">opus</option>
+                        <option value="vorbis">vorbis</option>
+                    </select>
+                </div>
+                
+                <div class="param-row">
+                    <div class="param-group">
+                        <label class="param-label">质量 (CRF: 0-51)</label>
+                        <input type="number" class="param-input" id="crfValue" min="0" max="51" value="23">
+                        <input type="range" class="param-slider" id="crfSlider" min="0" max="51" value="23">
+                    </div>
+                    
+                    <div class="param-group">
+                        <label class="param-label">编码预设 (-preset)</label>
+                        <select class="param-input" id="presetValue">
+                            <option value="ultrafast">ultrafast</option>
+                            <option value="superfast">superfast</option>
+                            <option value="veryfast">veryfast</option>
+                            <option value="faster">faster</option>
+                            <option value="fast">fast</option>
+                            <option value="medium" selected>medium</option>
+                            <option value="slow">slow</option>
+                            <option value="slower">slower</option>
+                            <option value="veryslow">veryslow</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="advanced-toggle" id="advancedToggle">显示高级参数 ▼</div>
+                
+                <div class="advanced-params" id="advancedParams">
+                    <div class="param-group">
+                        <label class="param-label">像素格式 (-pix_fmt)</label>
+                        <select class="param-input" id="pixFmt">
+                            <option value="yuv420p" selected>yuv420p</option>
+                            <option value="yuv422p">yuv422p</option>
+                            <option value="yuv444p">yuv444p</option>
+                            <option value="yuvj420p">yuvj420p</option>
+                        </select>
+                    </div>
+                    
+                    <div class="param-group">
+                        <label class="param-label">Movflags (-movflags)</label>
+                        <input type="text" class="param-input" id="movFlags" value="+faststart">
+                    </div>
+                    
+                    <div class="param-group">
+                        <label class="param-label">其他参数</label>
+                        <input type="text" class="param-input" id="otherParams" placeholder="例如: -b:v 1000k -maxrate 1500k">
+                    </div>
+                </div>
+                
+                <button class="reset-btn" id="resetParamsBtn">重置为默认值</button>
+            </div>
+            <!-- 文本显示区域 -->
+            <textarea class="text-display" id="textDisplay" placeholder="处理信息将显示在这里..."></textarea>
 
-        <!-- 分析按钮 -->
-        <div class="analyze-btn-wrapper" id="analyzeBtnWrapper">
-            <img src="static/images/analyze-icon.png" alt="分析视频">
         </div>
     </div>
-
-    <p id="fileName"></p>
-
-    <!-- 剪辑视频展示区域 -->
-    <div id="cutVideoContainer" class="video-preview" style="margin-top: 30px;"></div>
 </div>
 
 <script>
@@ -270,9 +501,36 @@
         const progressBar = document.getElementById('progressBar');
         const errorMessage = document.getElementById('errorMessage');
         const processingText = document.getElementById('processingText');
+        const textDisplay = document.getElementById('textDisplay');
+
+        // FFmpeg 参数相关元素
+        const advancedToggle = document.getElementById('advancedToggle');
+        const advancedParams = document.getElementById('advancedParams');
+        const resetParamsBtn = document.getElementById('resetParamsBtn');
+        
+        // 参数输入元素
+        const videoCodec = document.getElementById('videoCodec');
+        const audioCodec = document.getElementById('audioCodec');
+        const crfValue = document.getElementById('crfValue');
+        const crfSlider = document.getElementById('crfSlider');
+        const presetValue = document.getElementById('presetValue');
+        const pixFmt = document.getElementById('pixFmt');
+        const movFlags = document.getElementById('movFlags');
+        const otherParams = document.getElementById('otherParams');
 
         let currentVideo = null;
         let selectedFilePath = null; // 存储选中的文件路径
+        
+        // FFmpeg 参数相关变量
+        let ffmpegParams = {
+            videoCodec: 'libx264',
+            audioCodec: 'aac',
+            crf: 23,
+            preset: 'fast',
+            pixFmt: 'yuv420p',
+            movFlags: '+faststart',
+            otherParams: ''
+        };
 
         // 初始时禁用分析按钮
         analyzeBtnWrapper.classList.add('disabled');
@@ -292,7 +550,7 @@
             document.body.style.backgroundSize = 'cover';
 
             // 显示主内容
-            mainContent.style.display = 'flex';
+            mainContent.style.display = 'block';
             mainContent.style.opacity = '1';
         }, 4000);
 
@@ -354,12 +612,85 @@
             cutVideoOnServer(start, end, selectedFilePath);
         });
 
+        // 切换高级参数显示
+        advancedToggle.addEventListener('click', function() {
+            if (advancedParams.style.display === 'none') {
+                advancedParams.style.display = 'block';
+                advancedToggle.textContent = '隐藏高级参数 ▲';
+            } else {
+                advancedParams.style.display = 'none';
+                advancedToggle.textContent = '显示高级参数 ▼';
+            }
+        });
+        
+        // CRF 值同步
+        crfValue.addEventListener('input', function() {
+            crfSlider.value = crfValue.value;
+            ffmpegParams.crf = parseInt(crfValue.value);
+        });
+        
+        crfSlider.addEventListener('input', function() {
+            crfValue.value = crfSlider.value;
+            ffmpegParams.crf = parseInt(crfSlider.value);
+        });
+        
+        // 其他参数同步
+        videoCodec.addEventListener('change', function() {
+            ffmpegParams.videoCodec = videoCodec.value;
+        });
+        
+        audioCodec.addEventListener('change', function() {
+            ffmpegParams.audioCodec = audioCodec.value;
+        });
+        
+        presetValue.addEventListener('change', function() {
+            ffmpegParams.preset = presetValue.value;
+        });
+        
+        pixFmt.addEventListener('change', function() {
+            ffmpegParams.pixFmt = pixFmt.value;
+        });
+        
+        movFlags.addEventListener('input', function() {
+            ffmpegParams.movFlags = movFlags.value;
+        });
+        
+        otherParams.addEventListener('input', function() {
+            ffmpegParams.otherParams = otherParams.value;
+        });
+        
+        // 重置参数
+        resetParamsBtn.addEventListener('click', function() {
+            videoCodec.value = 'libx264';
+            audioCodec.value = 'aac';
+            crfValue.value = 23;
+            crfSlider.value = 23;
+            presetValue.value = 'fast';
+            pixFmt.value = 'yuv420p';
+            movFlags.value = '+faststart';
+            otherParams.value = '';
+            
+            // 更新参数对象
+            ffmpegParams = {
+                videoCodec: 'libx264',
+                audioCodec: 'aac',
+                crf: 23,
+                preset: 'fast',
+                pixFmt: 'yuv420p',
+                movFlags: '+faststart',
+                otherParams: ''
+            };
+            
+            textDisplay.value += "参数已重置为默认值\n";
+        });
+
         // 在服务器端剪辑视频
         function cutVideoOnServer(start, end, filename) {
             // 显示进度条和处理中提示
             progressContainer.style.display = 'block';
             processingText.style.display = 'block';
             progressBar.style.width = '0%';
+            textDisplay.value = "开始处理视频...\n";
             
             // 禁用分析按钮防止重复点击
             analyzeBtnWrapper.classList.add('disabled');
@@ -384,7 +715,8 @@
                     start: start.toFixed(2),
                     end: end.toFixed(2),
                     path: '/videos/input', // 服务器端输入路径
-                    name: filename
+                    name: filename,
+                    ffmpegParams: ffmpegParams  // 添加 ffmpeg 参数
                 })
             })
             .then(response => response.json())
@@ -401,6 +733,7 @@
                 
                 if (data.code === 0) {
                     console.log('剪辑成功:', data.data.output);
+                    textDisplay.value += "视频剪辑成功!\n输出路径: " + data.data.output + "\n";
                     
                     // 隐藏错误信息
                     errorMessage.style.display = 'none';
@@ -414,6 +747,7 @@
                     // 显示错误信息
                     errorMessage.textContent = `剪辑失败: ${data.message}\n${data.error || ''}`;
                     errorMessage.style.display = 'block';
+                    textDisplay.value += "剪辑失败: " + data.message + "\n";
                     console.error('剪辑失败:', data);
                     alert('剪辑失败: ' + data.message);
                 }
@@ -431,6 +765,7 @@
                 
                 errorMessage.textContent = `网络错误: ${error.message}`;
                 errorMessage.style.display = 'block';
+                textDisplay.value += "网络错误: " + error.message + "\n";
                 alert('调用剪辑接口失败: ' + error.message);
                 console.error(error);
             });
