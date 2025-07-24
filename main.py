@@ -55,7 +55,7 @@ def result():
 @app.route('/chatollama', methods=['POST'])
 def chat_with_ollama():
     data = request.get_json()
-    prompt = data.get('prompt')
+    prompt = data.get('prompt','你好')
     model = data.get('model', 'huihui_ai/qwen2.5-1m-abliterated:latest') 
 
     if not prompt:

@@ -222,7 +222,7 @@
             border-radius: 10px;
             padding: 20px;
             margin: 10px 15px;
-            margin-top: 15vh;
+            margin-top: 8vh;
             border: 1px solid #39dcbb;
             width: 50%;
         }
@@ -251,8 +251,16 @@
             font-weight: bold;
         }
         
-        .param-group {
-            margin-bottom: 15px;
+        .param-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .param-row .param-group {
+            flex: 1;
+            margin-bottom: 0;
         }
         
         .param-label {
@@ -388,6 +396,11 @@
                 <div class="analyze-btn-wrapper" id="analyzeBtnWrapper">
                     <img src="static/images/analyze-icon.png" alt="分析视频">
                 </div>
+                
+                <!-- 剪辑按钮 -->
+                <div class="analyze-btn-wrapper" id="cutBtnWrapper">
+                    <img src="static/images/cut-icon.png" alt="剪辑视频">
+                </div>
             </div>
 
             <p id="fileName"></p>
@@ -431,22 +444,30 @@
                         <input type="number" class="param-input" id="crfValue" min="0" max="51" value="23">
                         <input type="range" class="param-slider" id="crfSlider" min="0" max="51" value="23">
                     </div>
-                    
-                    <div class="param-group">
-                        <label class="param-label">编码预设 (-preset)</label>
-                        <select class="param-input" id="presetValue">
-                            <option value="ultrafast">ultrafast</option>
-                            <option value="superfast">superfast</option>
-                            <option value="veryfast">veryfast</option>
-                            <option value="faster">faster</option>
-                            <option value="fast">fast</option>
-                            <option value="medium" selected>medium</option>
-                            <option value="slow">slow</option>
-                            <option value="slower">slower</option>
-                            <option value="veryslow">veryslow</option>
-                        </select>
-                    </div>
+                <div class="param-group">
+                    <label class="param-label">起始时间 (秒)</label>
+                    <input type="number" class="param-input" id="startTime" min="0" value="0" step="0.1">
                 </div>
+                
+                <div class="param-group">
+                    <label class="param-label">结束时间 (秒)</label>
+                    <input type="number" class="param-input" id="endTime" min="0" value="10" step="0.1">
+                </div>
+                <div class="param-group">
+                    <label class="param-label">编码预设 (-preset)</label>
+                    <select class="param-input" id="presetValue">
+                        <option value="ultrafast">ultrafast</option>
+                        <option value="superfast">superfast</option>
+                        <option value="veryfast">veryfast</option>
+                        <option value="faster">faster</option>
+                        <option value="fast">fast</option>
+                        <option value="medium" selected>medium</option>
+                        <option value="slow">slow</option>
+                        <option value="slower">slower</option>
+                        <option value="veryslow">veryslow</option>
+                    </select>
+                </div>
+            </div>
                 
                 <div class="advanced-toggle" id="advancedToggle">显示高级参数 ▼</div>
                 
@@ -482,8 +503,6 @@
 </div>
 
 <script>
-    console.log("JS 开始执行");
-
     document.addEventListener('DOMContentLoaded', function () {
         console.log("DOM 加载完成");
 
@@ -493,6 +512,7 @@
         const mainContent = document.getElementById('mainContent');
         const uploadBtnWrapper = document.getElementById('uploadBtnWrapper');
         const analyzeBtnWrapper = document.getElementById('analyzeBtnWrapper');
+        const cutBtnWrapper = document.getElementById('cutBtnWrapper'); // 新增剪辑按钮
         const videoInput = document.getElementById('videoInput');
         const fileName = document.getElementById('fileName');
         const videoPreview = document.getElementById('videoPreview');
@@ -517,6 +537,10 @@
         const pixFmt = document.getElementById('pixFmt');
         const movFlags = document.getElementById('movFlags');
         const otherParams = document.getElementById('otherParams');
+        
+        // 新增时间参数元素
+        const startTime = document.getElementById('startTime');
+        const endTime = document.getElementById('endTime');
 
         let currentVideo = null;
         let selectedFilePath = null; // 存储选中的文件路径
@@ -529,11 +553,14 @@
             preset: 'fast',
             pixFmt: 'yuv420p',
             movFlags: '+faststart',
-            otherParams: ''
+            otherParams: '',
+            startTime: 0,
+            endTime: 10
         };
 
-        // 初始时禁用分析按钮
+        // 初始时禁用分析按钮和剪辑按钮
         analyzeBtnWrapper.classList.add('disabled');
+        cutBtnWrapper.classList.add('disabled');
 
         // 显示 intro 动画
         setTimeout(() => {
@@ -581,17 +608,24 @@
             videoPreview.appendChild(videoElement);
             currentVideo = videoElement;
 
-            // 启用分析按钮
+            // 启用分析按钮和剪辑按钮
             analyzeBtnWrapper.classList.remove('disabled');
+            cutBtnWrapper.classList.remove('disabled');
             
             // 保存文件路径信息（用于后续处理）
             selectedFilePath = file.name;
             
             // 隐藏错误信息
             errorMessage.style.display = 'none';
+            
+            // 更新结束时间为视频时长
+            videoElement.addEventListener('loadedmetadata', function() {
+                endTime.value = Math.floor(videoElement.duration * 10) / 10;
+                ffmpegParams.endTime = endTime.value;
+            });
         });
 
-        // 分析按钮点击事件
+        // 分析按钮点击事件 - 调用 Ollama 接口
         analyzeBtnWrapper.addEventListener('click', function () {
             // 如果按钮被禁用，则不执行任何操作
             if (analyzeBtnWrapper.classList.contains('disabled')) {
@@ -603,10 +637,30 @@
                 return;
             }
 
-            // 使用当前视频的时长信息
-            const duration = currentVideo.duration;
-            const start = Math.random() * (duration - 2);
-            const end = start + 1 + Math.random() * (duration - start - 1);
+            // 调用 Ollama 接口
+            callOllamaAPI();
+        });
+        
+        // 剪辑按钮点击事件 - 执行剪辑功能
+        cutBtnWrapper.addEventListener('click', function () {
+            // 如果按钮被禁用，则不执行任何操作
+            if (cutBtnWrapper.classList.contains('disabled')) {
+                return;
+            }
+
+            if (!currentVideo) {
+                alert('请先选择视频');
+                return;
+            }
+
+            // 获取用户设置的时间参数
+            const start = parseFloat(startTime.value);
+            const end = parseFloat(endTime.value);
+            
+            if (isNaN(start) || isNaN(end) || start >= end) {
+                alert('请设置有效的起始时间和结束时间');
+                return;
+            }
 
             // 调用服务器端剪辑功能
             cutVideoOnServer(start, end, selectedFilePath);
@@ -632,6 +686,15 @@
         crfSlider.addEventListener('input', function() {
             crfValue.value = crfSlider.value;
             ffmpegParams.crf = parseInt(crfSlider.value);
+        });
+        
+        // 时间参数同步
+        startTime.addEventListener('input', function() {
+            ffmpegParams.startTime = parseFloat(startTime.value) || 0;
+        });
+        
+        endTime.addEventListener('input', function() {
+            ffmpegParams.endTime = parseFloat(endTime.value) || 10;
         });
         
         // 其他参数同步
@@ -669,6 +732,8 @@
             pixFmt.value = 'yuv420p';
             movFlags.value = '+faststart';
             otherParams.value = '';
+            startTime.value = 0;
+            endTime.value = 10;
             
             // 更新参数对象
             ffmpegParams = {
@@ -678,12 +743,76 @@
                 preset: 'fast',
                 pixFmt: 'yuv420p',
                 movFlags: '+faststart',
-                otherParams: ''
+                otherParams: '',
+                startTime: 0,
+                endTime: 10
             };
             
             textDisplay.value += "参数已重置为默认值\n";
         });
 
+        // 调用 Ollama API
+        function callOllamaAPI() {
+            // 显示处理中提示
+            processingText.style.display = 'block';
+            textDisplay.value = "正在请求 AI 分析...\n";
+            
+            // 禁用分析按钮防止重复点击
+            analyzeBtnWrapper.classList.add('disabled');
+            
+            fetch('/chatollama', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    prompt: "你好"
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 恢复分析按钮
+                analyzeBtnWrapper.classList.remove('disabled');
+                
+                // 隐藏处理中提示
+                processingText.style.display = 'none';
+                
+                // 直接显示原始返回数据
+                textDisplay.value += "AI 响应原始数据:\n" + JSON.stringify(data, null, 2) + "\n";
+                
+                if (data.code === 0) {
+                    console.log('AI 分析成功:', data);
+                    // 如果有响应内容，则显示
+                    if (data.data && data.data.response) {
+                        textDisplay.value += "AI 分析结果:\n" + data.data.response + "\n";
+                    }
+                    
+                    // 隐藏错误信息
+                    errorMessage.style.display = 'none';
+                } else {
+                    // 显示错误信息
+                    errorMessage.textContent = `AI 分析失败: ${data.message}`;
+                    errorMessage.style.display = 'block';
+                    textDisplay.value += "AI 分析失败: " + data.message + "\n";
+                    console.error('AI 分析失败:', data);
+                    alert('AI 分析失败: ' + data.message);
+                }
+            })
+    .catch(error => {
+        // 恢复分析按钮
+        analyzeBtnWrapper.classList.remove('disabled');
+        
+        // 隐藏处理中提示
+        processingText.style.display = 'none';
+        
+        errorMessage.textContent = `网络错误: ${error.message}`;
+        errorMessage.style.display = 'block';
+        textDisplay.value += "网络错误: " + error.message + "\n";
+        textDisplay.value += "错误详情: " + JSON.stringify(error, null, 2) + "\n";
+        alert('调用 AI 分析接口失败: ' + error.message);
+        console.error(error);
+    });
+}
         // 在服务器端剪辑视频
         function cutVideoOnServer(start, end, filename) {
             // 显示进度条和处理中提示
@@ -692,8 +821,8 @@
             progressBar.style.width = '0%';
             textDisplay.value = "开始处理视频...\n";
             
-            // 禁用分析按钮防止重复点击
-            analyzeBtnWrapper.classList.add('disabled');
+            // 禁用剪辑按钮防止重复点击
+            cutBtnWrapper.classList.add('disabled');
             
             // 模拟进度条动画
             let progress = 0;
@@ -731,6 +860,9 @@
                     processingText.style.display = 'none';
                 }, 500);
                 
+                // 恢复剪辑按钮
+                cutBtnWrapper.classList.remove('disabled');
+                
                 if (data.code === 0) {
                     console.log('剪辑成功:', data.data.output);
                     textDisplay.value += "视频剪辑成功!\n输出路径: " + data.data.output + "\n";
@@ -741,9 +873,6 @@
                     // 直接打开result.html页面，而不是路由跳转
                     window.open('http://127.0.0.1:5839/result', '_blank');
                 } else {
-                    // 恢复分析按钮
-                    analyzeBtnWrapper.classList.remove('disabled');
-                    
                     // 显示错误信息
                     errorMessage.textContent = `剪辑失败: ${data.message}\n${data.error || ''}`;
                     errorMessage.style.display = 'block';
@@ -760,8 +889,8 @@
                 progressContainer.style.display = 'none';
                 processingText.style.display = 'none';
                 
-                // 恢复分析按钮
-                analyzeBtnWrapper.classList.remove('disabled');
+                // 恢复剪辑按钮
+                cutBtnWrapper.classList.remove('disabled');
                 
                 errorMessage.textContent = `网络错误: ${error.message}`;
                 errorMessage.style.display = 'block';
