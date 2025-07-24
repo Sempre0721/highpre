@@ -19,8 +19,7 @@
     body {
         margin: 0;
         padding: 0;
-        background: url('/static/images/background.jpg') no-repeat center center fixed;
-        background-size: cover;
+        background: #000; /* 纯黑色背景 */
         color: white;
         font-family: 'MiSans', 'Segoe UI', sans-serif;
         height: 100vh;
@@ -54,21 +53,34 @@
         flex-direction: column;
         align-items: center;
         margin-top: 0;
+        width: 100%;
+        box-sizing: border-box;
     }
 
-    /* 视频容器 */
+    /* 视频容器 - 初始占据整个屏幕 */
     .video-container {
-        width: 25vw;
-        height: 25vh;
-        max-width: 800px;
-        aspect-ratio: 16 / 9;
+        width: 100vw;
+        height: 100vh;
         background-color: #111;
-        border-radius: 10px;
+        border-radius: 0;
         overflow: hidden;
-        margin-bottom: 30px;
         display: flex;
         align-items: center;
         justify-content: center;
+        border: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 10;
+        transition: all 0.5s ease;
+    }
+
+    .video-container.video-small {
+        width: 800px;
+        height: 450px; /* 16:9 比例 */
+        position: relative;
+        margin-top: 20px;
+        border-radius: 10px;
         border: 1px solid #00ffff;
     }
 
@@ -91,9 +103,33 @@
         font-weight: bold;
         margin-top: 2vh;
         transition: all 0.3s ease;
+        z-index: 20;
+        position: relative;
     }
 
     .back-btn:hover {
+        background-color: #2db09d;
+        transform: scale(1.05);
+    }
+
+    /* 下一步按钮样式 */
+    .next-btn {
+        background-color: #39dcbb;
+        color: #000;
+        border: none;
+        padding: 12px 24px;
+        font-size: 16px;
+        border-radius: 30px;
+        cursor: pointer;
+        font-family: 'MiSans', sans-serif;
+        font-weight: bold;
+        margin-top: 20px;
+        transition: all 0.3s ease;
+        z-index: 20;
+        position: relative;
+    }
+
+    .next-btn:hover {
         background-color: #2db09d;
         transform: scale(1.05);
     }
@@ -103,6 +139,8 @@
         color: #39dcbb;
         text-shadow: 0 0 2px #00ffff;
         margin-bottom: 20px;
+        z-index: 20;
+        position: relative;
     }
 
     /* 卡片容器 */
@@ -112,6 +150,17 @@
         gap: 20px;
         justify-content: center;
         width: 90vw;
+        margin-top: 30px;
+        z-index: 20;
+        position: relative;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+    }
+
+    .cards-container.show {
+        opacity: 1;
+        transform: translateY(0);
     }
 
     /* 卡片样式 */
@@ -259,11 +308,13 @@
     <div class="container">
         <h1>视频处理中心</h1>
 
-        <div class="video-container">
+        <div class="video-container" id="videoContainer">
             <video id="resultVideo" controls autoplay></video>
         </div>
 
-        <div class="cards-container">
+        <button class="next-btn" id="nextBtn">下一步</button>
+
+        <div class="cards-container" id="cardsContainer">
             <!-- 视频抽帧 -->
             <div class="card">
                 <h3>视频抽帧</h3>
@@ -440,7 +491,25 @@
 
     <script>
         const videoElement = document.getElementById('resultVideo');
+        const videoContainer = document.getElementById('videoContainer');
+        const nextBtn = document.getElementById('nextBtn');
+        const cardsContainer = document.getElementById('cardsContainer');
+        
         videoElement.src = '../videos/output/cut_test.mp4';
+
+        // 下一步按钮点击事件
+        nextBtn.addEventListener('click', function() {
+            // 缩小视频容器
+            videoContainer.classList.add('video-small');
+            
+            // 显示卡片容器
+            setTimeout(() => {
+                cardsContainer.classList.add('show');
+            }, 300);
+            
+            // 隐藏下一步按钮
+            nextBtn.style.display = 'none';
+        });
 
         // 初始化音量旋钮
         document.addEventListener('DOMContentLoaded', function() {
