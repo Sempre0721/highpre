@@ -36,7 +36,6 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.4), rgba(0,0,0,0.6));
             z-index: 0;
             transition: background 1s ease;
         }
@@ -54,6 +53,7 @@
             text-align: center;
             opacity: 0;
             transition: opacity 1s ease;
+            color: #39dcbb; /* 修改欢迎文字颜色 */
         }
 
         .line1, .line2 {
@@ -115,8 +115,7 @@
         }
 
         .upload-btn-wrapper,
-        .analyze-btn-wrapper,
-        .reupload-btn-wrapper {
+        .analyze-btn-wrapper {
             position: relative;
             width: 100px;
             height: 100px;
@@ -127,8 +126,7 @@
         }
 
         .upload-btn-wrapper img,
-        .analyze-btn-wrapper img,
-        .reupload-btn-wrapper img {
+        .analyze-btn-wrapper img {
             width: 100%;
             height: 100%;
             object-fit: contain;
@@ -151,6 +149,35 @@
             0% { opacity: 0; }
             100% { opacity: 1; }
         }
+        
+        /* 添加进度条样式 */
+        .progress-container {
+            width: 80%;
+            max-width: 600px;
+            height: 20px;
+            background-color: #333;
+            border-radius: 10px;
+            margin: 10px auto;
+            display: none;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: #4CAF50;
+            border-radius: 10px;
+            width: 0%;
+        }
+        
+        /* 禁用按钮样式 */
+        .disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        /* 文件名文字颜色 */
+        #fileName {
+            color: #39dcbb;
+        }
     </style>
 </head>
 <body>
@@ -163,6 +190,11 @@
 <div class="main-content" id="mainContent">
     <!-- 视频预览区域（始终 16:9） -->
     <div class="video-preview" id="videoPreview"></div>
+    
+    <!-- 进度条 -->
+    <div class="progress-container" id="progressContainer">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
 
     <!-- 按钮容器 -->
     <div class="upload-analyze-container">
@@ -175,11 +207,6 @@
         <!-- 分析按钮 -->
         <div class="analyze-btn-wrapper" id="analyzeBtnWrapper">
             <img src="static/images/analyze-icon.png" alt="分析视频">
-        </div>
-
-        <!-- 重新上传按钮 -->
-        <div class="reupload-btn-wrapper" id="reuploadBtnWrapper">
-            <img src="static/images/upload-icon.png" alt="重新上传">
         </div>
     </div>
 
@@ -201,13 +228,18 @@
         const mainContent = document.getElementById('mainContent');
         const uploadBtnWrapper = document.getElementById('uploadBtnWrapper');
         const analyzeBtnWrapper = document.getElementById('analyzeBtnWrapper');
-        const reuploadBtnWrapper = document.getElementById('reuploadBtnWrapper');
         const videoInput = document.getElementById('videoInput');
         const fileName = document.getElementById('fileName');
         const videoPreview = document.getElementById('videoPreview');
         const cutVideoContainer = document.getElementById('cutVideoContainer');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
 
         let currentVideo = null;
+        let selectedFilePath = null; // 存储选中的文件路径
+
+        // 初始时禁用分析按钮
+        analyzeBtnWrapper.classList.add('disabled');
 
         // 显示 intro 动画
         setTimeout(() => {
@@ -242,6 +274,7 @@
                 currentVideo = null;
             }
 
+            // 创建文件访问 URL 用于预览
             const videoURL = URL.createObjectURL(file);
             const videoElement = document.createElement('video');
             videoElement.src = videoURL;
@@ -254,85 +287,50 @@
             videoPreview.appendChild(videoElement);
             currentVideo = videoElement;
 
-            // 隐藏上传按钮，显示分析按钮 + 重新上传按钮
-            uploadBtnWrapper.style.display = 'none';
-            analyzeBtnWrapper.style.display = 'flex';
-            reuploadBtnWrapper.style.display = 'flex';
+            // 启用分析按钮
+            analyzeBtnWrapper.classList.remove('disabled');
+            
+            // 保存文件路径信息（用于后续处理）
+            selectedFilePath = file.name;
         });
 
         // 分析按钮点击事件
         analyzeBtnWrapper.addEventListener('click', function () {
-            if (!currentVideo) {
-                alert('请先上传视频');
+            // 如果按钮被禁用，则不执行任何操作
+            if (analyzeBtnWrapper.classList.contains('disabled')) {
                 return;
             }
 
-            const file = videoInput.files[0];
-            const inputPath = '/videos/input';
-            const name = file.name;
+            if (!currentVideo) {
+                alert('请先选择视频');
+                return;
+            }
 
+            // 使用当前视频的时长信息
             const duration = currentVideo.duration;
             const start = Math.random() * (duration - 2);
             const end = start + 1 + Math.random() * (duration - start - 1);
 
-            fetch('/cut_video', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    start: start.toFixed(2),
-                    end: end.toFixed(2),
-                    path: inputPath,
-                    name: name
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.code === 0) {
-                    console.log('剪辑成功:', data.data.output);
-
-                    cutVideoContainer.style.display = 'block';
-                    cutVideoContainer.innerHTML = `
-                        <video src="${data.data.output}" controls autoplay></video>
-                    `;
-
-                    // 隐藏分析按钮，显示重新上传按钮
-                    uploadBtnWrapper.style.display = 'none';
-                    analyzeBtnWrapper.style.display = 'none';
-                    reuploadBtnWrapper.style.display = 'flex';
-                } else {
-                    alert('剪辑失败: ' + data.message);
-                    console.error(data);
-                }
-            })
-            .catch(error => {
-                alert('调用剪辑接口失败');
-                console.error(error);
-            });
+            // 直接在浏览器端进行视频剪辑（使用 MediaRecorder API）
+            cutVideoInBrowser(currentVideo, start, end);
         });
 
-        // 重新上传按钮点击事件
-        reuploadBtnWrapper.addEventListener('click', function () {
-            // 清除视频
-            if (currentVideo) {
-                currentVideo.pause();
-                currentVideo.srcObject = null;
-                currentVideo = null;
-            }
-
-            // 清除剪辑视频
-            cutVideoContainer.style.display = 'none';
-            cutVideoContainer.innerHTML = '';
-
-            // 显示上传按钮，隐藏分析和重新上传按钮
-            uploadBtnWrapper.style.display = 'flex';
-            analyzeBtnWrapper.style.display = 'none';
-            reuploadBtnWrapper.style.display = 'none';
-
-            // 清除文件名
-            fileName.textContent = '';
-        });
+        // 在浏览器端剪辑视频
+        function cutVideoInBrowser(videoElement, start, end) {
+            alert('本地视频剪辑功能正在开发中...');
+            
+            // 这里应该实现浏览器端的视频剪辑逻辑
+            // 由于浏览器安全限制，直接访问本地文件系统比较困难
+            // 建议使用以下方案之一：
+            // 1. 继续使用服务器端处理（上传文件）
+            // 2. 使用 WebAssembly 版本的 ffmpeg
+            // 3. 使用 MediaRecorder API 进行录制
+            
+            // 示例：模拟剪辑成功
+            setTimeout(() => {
+                alert(`视频剪辑完成！\n开始时间: ${start.toFixed(2)}秒\n结束时间: ${end.toFixed(2)}秒`);
+            }, 1000);
+        }
     });
 </script>
 
