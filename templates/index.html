@@ -331,23 +331,23 @@
             resize: vertical;
         }
         
-        /* 滚动条样式 */
-        ::-webkit-scrollbar {
-            width: 8px;
+        /* 隐藏滚动条的样式 */
+        .left-panel::-webkit-scrollbar,
+        .right-panel::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
         }
         
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 4px;
+        /* 兼容 Firefox */
+        .left-panel,
+        .right-panel {
+            scrollbar-width: none;
         }
         
-        ::-webkit-scrollbar-thumb {
-            background: #39dcbb;
-            border-radius: 4px;
-        }
-        
-        ::-webkit-scrollbar-thumb:hover {
-            background: #2db09d;
+        /* 兼容 IE/Edge */
+        .left-panel,
+        .right-panel {
+            -ms-overflow-style: none;
         }
     </style>
 </head>
