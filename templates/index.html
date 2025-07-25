@@ -1326,6 +1326,113 @@
                 textDisplay.value += "模型参数已重置为默认值\n";
             }
         });
+
+            function analyzeVideoContent() {
+                if (!currentVideo) {
+                    alert('请先选择视频');
+                    return;
+                }
+
+                processingText.style.display = 'block';
+                textDisplay.value = "正在分析视频内容...\n";
+                
+                analyzeBtnWrapper.classList.add('disabled');
+                
+                // 获取视频base64编码
+                const file = videoInput.files[0];
+                if (!file) {
+                    alert('请先选择视频文件');
+                    analyzeBtnWrapper.classList.remove('disabled');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    // 提取base64数据
+                    const base64Data = e.target.result.split(',')[1]; // 去掉data:*/*;base64,前缀
+                    
+                    // 构建请求数据
+                    const requestData = {
+                        video_name: selectedFilePath,
+                        requirements: editingRequirements.value || "请分析这个视频并提供剪辑建议",
+                        model_source: modelSource.value,
+                        model: modelSelection.value,
+                        temperature: parseFloat(modelTemperature.value),
+                        seed: parseInt(randomSeed.value),
+                        maxTokens: parseInt(maxTokens.value),
+                        topP: parseFloat(topP.value),
+                        keywordWeights: keywordWeights.value,
+                        expectedClipLength: parseInt(expectedClipLength.value) || 30
+                    };
+                    
+                    // 发送请求到后端
+                    fetch('/analyze_video_content', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(requestData)
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        analyzeBtnWrapper.classList.remove('disabled');
+                        processingText.style.display = 'none';
+                        
+                        if (data.code === 0) {
+                            textDisplay.value += "视频内容分析结果:\n" + data.data.content_analysis + "\n\n";
+                            textDisplay.value += "剪辑建议:\n" + data.data.editing_suggestion + "\n";
+                            
+                            // 自动填充FFmpeg参数
+                            startTime.value = data.data.start_time;
+                            endTime.value = data.data.end_time;
+                            ffmpegParams.startTime = data.data.start_time;
+                            ffmpegParams.endTime = data.data.end_time;
+                            
+                            textDisplay.value += `\n已自动设置剪辑时间段: ${data.data.start_time}秒 到 ${data.data.end_time}秒\n`;
+                            
+                            errorMessage.style.display = 'none';
+                        } else {
+                            errorMessage.textContent = `视频分析失败: ${data.message}`;
+                            errorMessage.style.display = 'block';
+                            textDisplay.value += "视频分析失败: " + data.message + "\n";
+                            alert('视频分析失败: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        analyzeBtnWrapper.classList.remove('disabled');
+                        processingText.style.display = 'none';
+                        
+                        errorMessage.textContent = `网络错误: ${error.message}`;
+                        errorMessage.style.display = 'block';
+                        textDisplay.value += "网络错误: " + error.message + "\n";
+                        textDisplay.value += "错误详情: " + JSON.stringify(error, null, 2) + "\n";
+                        alert('调用视频分析接口失败: ' + error.message);
+                    });
+                };
+                
+                reader.onerror = function() {
+                    alert('读取视频文件失败');
+                    analyzeBtnWrapper.classList.remove('disabled');
+                };
+                
+                // 读取文件为base64
+                reader.readAsDataURL(file);
+            }
+
+            // 修改analyzeBtnWrapper的点击事件处理函数
+            analyzeBtnWrapper.addEventListener('click', function () {
+                if (analyzeBtnWrapper.classList.contains('disabled')) {
+                    return;
+                }
+
+                if (!currentVideo) {
+                    alert('请先选择视频');
+                    return;
+                }
+
+                // 调用新的视频分析函数
+                analyzeVideoContent();
+            });
     </script>
 
 </body>

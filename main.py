@@ -191,6 +191,262 @@ def get_history():
             'message': f'获取历史记录失败: {str(e)}'
         }), 500
 
+
+@app.route('/analyze_video_content', methods=['POST'])
+def analyze_video_content():
+    """
+    分析视频内容并根据剪辑需求获取剪辑时间段
+    """
+    start_time = datetime.now()
+    data = request.get_json()
+    video_name = data.get('video_name')
+    requirements = data.get('requirements', '')
+    model_source = data.get('model_source', 'local')
+    model = data.get('model', config['models']['ollama']['default_model'])
+    temperature = data.get('temperature', 0.7)
+    seed = data.get('seed', 42)
+    max_tokens = data.get('maxTokens', 1024)
+    top_p = data.get('topP', 0.9)
+    keyword_weights = data.get('keywordWeights', '')
+    expected_clip_length = data.get('expectedClipLength', 30)
+
+    if not video_name:
+        return jsonify({
+            'code': 1001,
+            'message': '缺少 video_name 参数'
+        }), 400
+
+    try:
+        # 1. 获取视频文件的base64编码
+        video_path = os.path.join(app.config['INPUT_FOLDER'], video_name)
+        if not os.path.exists(video_path):
+            return jsonify({
+                'code': 1002,
+                'message': f'视频文件不存在: {video_path}'
+            }), 404
+
+        # 记录历史 - 开始视频转码
+        record_history(
+            operation_type='video_analysis',
+            input_data=data,
+            output_data=None,
+            status='processing',
+            duration=None,
+            file_name=video_name,
+            description=f'开始视频分析 - 文件: {video_name}'
+        )
+
+        # 2. 将视频转为base64
+        with open(video_path, "rb") as video_file:
+            video_base64 = base64.b64encode(video_file.read()).decode('utf-8')
+
+        # 3. 构建视频分析提示词
+        analysis_prompt = f"""
+请分析这个视频的内容，并按照以下格式提供时间段和内容描述：
+格式："[开始时间-结束时间秒] 内容描述"
+例如：
+"[0-5] 视频开头的公司logo展示"
+"[5-12] 主持人介绍产品功能"
+"[12-20] 展示产品使用场景"
+
+视频内容分析：
+""".strip()
+
+        # 4. 调用AI模型分析视频内容
+        content_analysis_result = None
+        
+        if model_source == 'local':
+            # 使用Ollama分析
+            response = ollama.generate(
+                model=model,
+                prompt=analysis_prompt,
+                images=[video_base64],
+                options={
+                    'temperature': temperature,
+                    'seed': seed,
+                    'num_predict': max_tokens,
+                    'top_p': top_p
+                }
+            )
+            content_analysis_result = response['response'].strip()
+            
+        elif model_source == 'xfyun':
+            # 使用讯飞星火分析
+            client = OpenAI(
+                api_key=config['models']['xfyun']['api_key'],
+                base_url=config['models']['xfyun']['base_url']
+            )
+            
+            # 讯飞星火不直接支持图像输入，需要特殊处理
+            # 这里我们发送base64数据作为文本提示的一部分
+            full_prompt = f"{analysis_prompt}\n\n视频数据(Base64): {video_base64[:500]}..."  # 只发送前500字符避免过长
+            
+            completion = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": full_prompt
+                    }
+                ],
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+            content_analysis_result = completion.choices[0].message.content.strip()
+            
+        elif model_source == 'tencent':
+            # 使用腾讯云分析
+            client = OpenAI(
+                api_key=config['models']['tencent']['api_key'],
+                base_url=config['models']['tencent']['base_url']
+            )
+            
+            # 腾讯云混元不直接支持图像输入，需要特殊处理
+            full_prompt = f"{analysis_prompt}\n\n视频数据(Base64): {video_base64[:500]}..."  # 只发送前500字符避免过长
+            
+            completion = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": full_prompt
+                    }
+                ],
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+            content_analysis_result = completion.choices[0].message.content.strip()
+
+        # 5. 构建剪辑建议提示词
+        editing_prompt = f"""
+根据以下视频内容分析和剪辑需求，请提供应该剪辑的时间段。
+严格按照"x秒到x秒"格式回复，例如："5秒到20秒"
+
+视频内容分析:
+{content_analysis_result}
+
+剪辑需求: {requirements}
+期望片段长度: {expected_clip_length}秒
+
+请根据剪辑需求从视频内容中选择最符合的片段。
+""".strip()
+
+        # 6. 调用AI模型获取剪辑建议
+        editing_suggestion = None
+        
+        if model_source == 'local':
+            response = ollama.generate(
+                model=model,
+                prompt=editing_prompt,
+                options={
+                    'temperature': temperature,
+                    'seed': seed,
+                    'num_predict': max_tokens,
+                    'top_p': top_p
+                }
+            )
+            editing_suggestion = response['response'].strip()
+            
+        elif model_source == 'xfyun':
+            client = OpenAI(
+                api_key=config['models']['xfyun']['api_key'],
+                base_url=config['models']['xfyun']['base_url']
+            )
+            
+            completion = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": editing_prompt
+                    }
+                ],
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+            editing_suggestion = completion.choices[0].message.content.strip()
+            
+        elif model_source == 'tencent':
+            client = OpenAI(
+                api_key=config['models']['tencent']['api_key'],
+                base_url=config['models']['tencent']['base_url']
+            )
+            
+            completion = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": editing_prompt
+                    }
+                ],
+                temperature=temperature,
+                max_tokens=max_tokens
+            )
+            editing_suggestion = completion.choices[0].message.content.strip()
+
+        # 7. 解析剪辑时间段
+        import re
+        time_pattern = r"(\d+\.?\d*)\s*秒\s*到\s*(\d+\.?\d*)\s*秒"
+        match = re.search(time_pattern, editing_suggestion)
+        
+        if match:
+            start_time_val = float(match.group(1))
+            end_time_val = float(match.group(2))
+            
+            # 确保时间有效
+            if start_time_val >= end_time_val:
+                raise ValueError("解析的时间段无效：起始时间必须小于结束时间")
+                
+            result_data = {
+                'content_analysis': content_analysis_result,
+                'editing_suggestion': editing_suggestion,
+                'start_time': start_time_val,
+                'end_time': end_time_val
+            }
+            
+            end_time = datetime.now()
+            duration = (end_time - start_time).total_seconds()
+            
+            # 记录历史
+            record_history(
+                operation_type='video_analysis',
+                input_data=data,
+                output_data=result_data,
+                status='success',
+                duration=duration,
+                file_name=video_name,
+                description=f'视频分析成功 - 文件: {video_name}'
+            )
+            
+            return jsonify({
+                'code': 0,
+                'message': '视频分析成功',
+                'data': result_data
+            })
+        else:
+            raise ValueError("无法从AI回复中解析出有效的时间段")
+
+    except Exception as e:
+        end_time = datetime.now()
+        duration = (end_time - start_time).total_seconds()
+        
+        # 记录历史
+        record_history(
+            operation_type='video_analysis',
+            input_data=data,
+            output_data={'error': str(e)},
+            status='failed',
+            duration=duration,
+            file_name=video_name,
+            description=f'视频分析失败 - 文件: {video_name}'
+        )
+        
+        logger.error(f"视频分析失败: {str(e)}")
+        return jsonify({
+            'code': 1003,
+            'message': f'视频分析失败: {str(e)}'
+        }), 500
 # Ollama 接口
 @app.route('/ollama', methods=['POST'])
 def chat_with_ollama():

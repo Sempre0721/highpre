@@ -3,11 +3,3 @@ requests==2.31.0
 ollama==0.5.1
 openai==1.66.2
 tencentcloud-sdk-python==3.0.1430
-sqlite3
-datetime
-json
-os
-logging
-shutil
-subprocess
-base64
