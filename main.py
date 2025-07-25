@@ -1,3 +1,4 @@
+# main.py
 from flask import Flask, render_template, request, jsonify, send_from_directory
 import ollama
 import subprocess
@@ -52,12 +53,15 @@ def home():
 def result():
     return render_template('result.html')
 
-# 预留的 Ollama 接口
-@app.route('/chatollama', methods=['POST'])
+# Ollama 接口
+@app.route('/ollama', methods=['POST'])
 def chat_with_ollama():
     data = request.get_json()
     prompt = data.get('prompt')
-    model = data.get('model', 'huihui_ai/qwen2.5-1m-abliterated:latest') 
+    model = data.get('model', 'qwen2.5vl:3b')
+    temperature = data.get('temperature', 0.7)
+    seed = data.get('seed', 42)
+    max_tokens = data.get('maxTokens', 1024)
 
     if not prompt:
         return jsonify({
@@ -67,7 +71,15 @@ def chat_with_ollama():
 
     try:
         # 生成回复
-        response = ollama.generate(model=model, prompt=prompt)
+        response = ollama.generate(
+            model=model,
+            prompt=prompt,
+            options={
+                'temperature': temperature,
+                'seed': seed,
+                'num_predict': max_tokens
+            }
+        )
 
         return jsonify({
             'code': 0,
@@ -83,12 +95,14 @@ def chat_with_ollama():
             'message': f'调用 Ollama 失败: {str(e)}'
         }), 500
 
-#调用讯飞星火大模型
-@app.route('/chatxfyun', methods=['POST'])
+# 调用讯飞星火大模型
+@app.route('/xfyun', methods=['POST'])
 def chat_with_xfyun():
     data = request.get_json()
     prompt = data.get('prompt')
     model = data.get('model', '4.0Ultra')
+    temperature = data.get('temperature', 0.7)
+    max_tokens = data.get('maxTokens', 1024)
 
     if not prompt:
         return jsonify({
@@ -111,7 +125,9 @@ def chat_with_xfyun():
                     "role": "user",
                     "content": prompt
                 }
-            ]
+            ],
+            temperature=temperature,
+            max_tokens=max_tokens
         )
 
         return jsonify({
@@ -127,132 +143,6 @@ def chat_with_xfyun():
             'code': 1002,
             'message': f'调用讯飞星火 API 失败: {str(e)}'
         }), 500
-
-#亚马逊 AWS
-@app.route('/chat/aws', methods=['POST'])
-def chat_with_aws():
-    data = request.get_json()
-    prompt = data.get('prompt')
-
-    if not prompt:
-        return jsonify({
-            'code': 1001,
-            'message': '缺少 prompt 参数'
-        }), 400
-
-    try:
-        # 初始化 AWS 客户端 (这里以 boto3 为例)
-        client = boto3.client(
-            'bedrock',
-            region_name='us-east-1',
-            aws_access_key_id='your-access-key-id',
-            aws_secret_access_key='your-secret-access-key'
-        )
-        
-        # 调用模型生成回复
-        response = client.invoke_model(
-            Body=prompt,
-            ModelArn='arn:aws:bedrock:us-east-1::model/your-model-version'
-        )
-
-        return jsonify({
-            'code': 0,
-            'message': '成功获取模型回复',
-            'data': {
-                'response': response['Body'].read().decode('utf-8')
-            }
-        })
-
-    except Exception as e:
-        return jsonify({
-            'code': 1002,
-            'message': f'调用 AWS API 失败: {str(e)}'
-        }), 500
-
-# 腾讯云
-@app.route('/chat/tencent', methods=['POST'])
-def chat_with_tencent():
-    data = request.get_json()
-    prompt = data.get('prompt')
-
-    if not prompt:
-        return jsonify({
-            'code': 1001,
-            'message': '缺少 prompt 参数'
-        }), 400
-
-    try:
-        # 初始化腾讯云客户端
-        client = nlp.NLPClient(
-            "your-region",
-            "your-secret-id",
-            "your-secret-key"
-        )
-        
-        # 调用模型生成回复
-        response = client.text_chat(prompt)
-
-        return jsonify({
-            'code': 0,
-            'message': '成功获取模型回复',
-            'data': {
-                'response': response['Reply']
-            }
-        })
-
-    except Exception as e:
-        return jsonify({
-            'code': 1002,
-            'message': f'调用腾讯云 API 失败: {str(e)}'
-        }), 500
-
-#TEN 语音识别与合成
-@app.route('/ten/speech', methods=['POST'])
-def speech_with_ten():
-    data = request.get_json()
-    action = data.get('action')  # 'recognize' 或 'synthesize'
-    content = data.get('content')  # 对于 'synthesize' 是文本，对于 'recognize' 是音频文件路径
-
-    if not action or (action == 'synthesize' and not content) or (action == 'recognize' and not content):
-        return jsonify({
-            'code': 1001,
-            'message': '缺少必要的参数'
-        }), 400
-
-    try:
-        # 根据 action 执行不同的操作
-        if action == 'recognize':
-            with open(content, 'rb') as audio_file:
-                response = requests.post(
-                    "https://api.ten.com/speech/recognize",
-                    headers={'Authorization': 'Bearer your-api-key'},
-                    files={'audio': audio_file}
-                )
-        else:  # synthesize
-            response = requests.post(
-                "https://api.ten.com/speech/synthesize",
-                headers={'Authorization': 'Bearer your-api-key'},
-                json={'text': content}
-            )
-            with open('output.mp3', 'wb') as out:
-                out.write(response.content)
-
-        return jsonify({
-            'code': 0,
-            'message': '操作成功',
-            'data': {
-                'result': response.json() if action == 'recognize' else 'output.mp3'
-            }
-        })
-
-    except Exception as e:
-        return jsonify({
-            'code': 1002,
-            'message': f'操作失败: {str(e)}'
-        }), 500
-    
-
-
 
 @app.route('/cut_video', methods=['POST'])
 def cut_video():
