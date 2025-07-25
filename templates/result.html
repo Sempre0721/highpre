@@ -336,7 +336,7 @@
                 <input type="number" min="1" value="1" class="param-fps">
                 <label>输出路径</label>
                 <input type="text" value="frames/frame_%04d.png" class="param-output">
-                <button onclick="processVideo('extract_frames')">开始处理</button>
+                <button onclick="processVideo('extract_frames', this)">开始处理</button>
             </div>
 
             <!-- 转换格式 -->
@@ -355,7 +355,7 @@
                 </select>
                 <label>输出路径</label>
                 <input type="text" value="output/output.mp4" class="param-output">
-                <button onclick="processVideo('convert_format')">开始处理</button>
+                <button onclick="processVideo('convert_format', this)">开始处理</button>
             </div>
 
             <!-- 修改分辨率 -->
@@ -371,7 +371,7 @@
                 </div>
                 <label>输出路径</label>
                 <input type="text" value="output/resized_video.mp4" class="param-output">
-                <button onclick="processVideo('resize_video')">开始处理</button>
+                <button onclick="processVideo('resize_video', this)">开始处理</button>
             </div>
 
             <!-- 裁剪视频 -->
@@ -399,7 +399,7 @@
                 </div>
                 <label>输出路径</label>
                 <input type="text" value="output/trimmed_video.mp4" class="param-output">
-                <button onclick="processVideo('trim_video')">开始处理</button>
+                <button onclick="processVideo('trim_video', this)">开始处理</button>
             </div>
 
             <!-- 分离音频 -->
@@ -415,7 +415,7 @@
                 </select>
                 <label>输出路径</label>
                 <input type="text" value="output/audio.mp3" class="param-output">
-                <button onclick="processVideo('extract_audio')">开始处理</button>
+                <button onclick="processVideo('extract_audio', this)">开始处理</button>
             </div>
 
             <!-- 提取 GIF -->
@@ -443,7 +443,7 @@
                 </div>
                 <label>输出路径</label>
                 <input type="text" value="output/clip.gif" class="param-output">
-                <button onclick="processVideo('extract_gif')">开始处理</button>
+                <button onclick="processVideo('extract_gif', this)">开始处理</button>
             </div>
 
             <!-- 调整码率 -->
@@ -453,7 +453,7 @@
                 <input type="number" min="100" value="1024" class="param-bitrate">
                 <label>输出路径</label>
                 <input type="text" value="output/bitrate_adjusted.mp4" class="param-output">
-                <button onclick="processVideo('adjust_bitrate')">开始处理</button>
+                <button onclick="processVideo('adjust_bitrate', this)">开始处理</button>
             </div>
 
             <!-- 添加水印 -->
@@ -471,7 +471,7 @@
                 <input type="text" value="watermark.png" class="param-watermark-path">
                 <label>输出路径</label>
                 <input type="text" value="output/watermarked_video.mp4" class="param-output">
-                <button onclick="processVideo('add_watermark')">开始处理</button>
+                <button onclick="processVideo('add_watermark', this)">开始处理</button>
             </div>
 
             <!-- 合并视频 -->
@@ -483,7 +483,7 @@
                 <input type="text" value="video2.mp4" class="param-video2">
                 <label>输出路径</label>
                 <input type="text" value="output/merged_video.mp4" class="param-output">
-                <button onclick="processVideo('concat_videos')">开始处理</button>
+                <button onclick="processVideo('concat_videos', this)">开始处理</button>
             </div>
 
             <!-- 调整音量 -->
@@ -496,7 +496,7 @@
                 <input type="hidden" class="param-volume" value="1.0">
                 <label>输出路径</label>
                 <input type="text" value="output/volume_adjusted.mp4" class="param-output">
-                <button onclick="processVideo('adjust_volume')">开始处理</button>
+                <button onclick="processVideo('adjust_volume', this)">开始处理</button>
             </div>
         </div>
 
@@ -576,74 +576,77 @@
             }
         });
 
-        function processVideo(action) {
+        function processVideo(action, buttonElement) {
             const videoPath = '../videos/output/cut_test.mp4';
             let params = {};
+            
+            // 获取当前按钮所在的卡片容器
+            const card = buttonElement.closest('.card');
 
             switch (action) {
                 case 'extract_frames':
-                    params.fps = document.querySelector('.param-fps').value;
-                    params.output = document.querySelector('.param-output').value;
+                    params.fps = card.querySelector('.param-fps').value;
+                    params.output = card.querySelector('.param-output').value;
                     break;
                 case 'convert_format':
-                    params.format = document.querySelector('.param-format').value;
-                    params.output = document.querySelector('.param-output').value;
+                    params.format = card.querySelector('.param-format').value;
+                    params.output = card.querySelector('.param-output').value;
                     break;
                 case 'resize_video':
-                    params.width = document.querySelector('.param-width').value;
-                    params.height = document.querySelector('.param-height').value;
-                    params.keep_ratio = document.querySelector('.param-keep-ratio').checked;
-                    params.output = document.querySelector('.param-output').value;
+                    params.width = card.querySelector('.param-width').value;
+                    params.height = card.querySelector('.param-height').value;
+                    params.keep_ratio = card.querySelector('.param-keep-ratio').checked;
+                    params.output = card.querySelector('.param-output').value;
                     break;
                 case 'trim_video':
-                    const startH = parseInt(document.querySelector('.param-start-h').value) || 0;
-                    const startM = parseInt(document.querySelector('.param-start-m').value) || 0;
-                    const startS = parseInt(document.querySelector('.param-start-s').value) || 0;
-                    const startMs = parseInt(document.querySelector('.param-start-ms').value) || 0;
-                    const endH = parseInt(document.querySelector('.param-end-h').value) || 0;
-                    const endM = parseInt(document.querySelector('.param-end-m').value) || 0;
-                    const endS = parseInt(document.querySelector('.param-end-s').value) || 0;
-                    const endMs = parseInt(document.querySelector('.param-end-ms').value) || 0;
+                    const startH = parseInt(card.querySelector('.param-start-h').value) || 0;
+                    const startM = parseInt(card.querySelector('.param-start-m').value) || 0;
+                    const startS = parseInt(card.querySelector('.param-start-s').value) || 0;
+                    const startMs = parseInt(card.querySelector('.param-start-ms').value) || 0;
+                    const endH = parseInt(card.querySelector('.param-end-h').value) || 0;
+                    const endM = parseInt(card.querySelector('.param-end-m').value) || 0;
+                    const endS = parseInt(card.querySelector('.param-end-s').value) || 0;
+                    const endMs = parseInt(card.querySelector('.param-end-ms').value) || 0;
                     
                     params.start = startH * 3600 + startM * 60 + startS + startMs / 1000;
                     params.end = endH * 3600 + endM * 60 + endS + endMs / 1000;
-                    params.output = document.querySelector('.param-output').value;
+                    params.output = card.querySelector('.param-output').value;
                     break;
                 case 'extract_audio':
-                    params.format = document.querySelector('.param-audio-format').value;
-                    params.output = document.querySelector('.param-output').value;
+                    params.format = card.querySelector('.param-audio-format').value;
+                    params.output = card.querySelector('.param-output').value;
                     break;
                 case 'extract_gif':
-                    const gifStartH = parseInt(document.querySelector('.param-start-h').value) || 0;
-                    const gifStartM = parseInt(document.querySelector('.param-start-m').value) || 0;
-                    const gifStartS = parseInt(document.querySelector('.param-start-s').value) || 0;
-                    const gifStartMs = parseInt(document.querySelector('.param-start-ms').value) || 0;
-                    const gifEndH = parseInt(document.querySelector('.param-end-h').value) || 0;
-                    const gifEndM = parseInt(document.querySelector('.param-end-m').value) || 0;
-                    const gifEndS = parseInt(document.querySelector('.param-end-s').value) || 0;
-                    const gifEndMs = parseInt(document.querySelector('.param-end-ms').value) || 0;
+                    const gifStartH = parseInt(card.querySelector('.param-start-h').value) || 0;
+                    const gifStartM = parseInt(card.querySelector('.param-start-m').value) || 0;
+                    const gifStartS = parseInt(card.querySelector('.param-start-s').value) || 0;
+                    const gifStartMs = parseInt(card.querySelector('.param-start-ms').value) || 0;
+                    const gifEndH = parseInt(card.querySelector('.param-end-h').value) || 0;
+                    const gifEndM = parseInt(card.querySelector('.param-end-m').value) || 0;
+                    const gifEndS = parseInt(card.querySelector('.param-end-s').value) || 0;
+                    const gifEndMs = parseInt(card.querySelector('.param-end-ms').value) || 0;
                     
                     params.start = gifStartH * 3600 + gifStartM * 60 + gifStartS + gifStartMs / 1000;
                     params.end = gifEndH * 3600 + gifEndM * 60 + gifEndS + gifEndMs / 1000;
-                    params.output = document.querySelector('.param-output').value;
+                    params.output = card.querySelector('.param-output').value;
                     break;
                 case 'adjust_bitrate':
-                    params.bitrate = document.querySelector('.param-bitrate').value;
-                    params.output = document.querySelector('.param-output').value;
+                    params.bitrate = card.querySelector('.param-bitrate').value;
+                    params.output = card.querySelector('.param-output').value;
                     break;
                 case 'add_watermark':
-                    params.position = document.querySelector('.param-position').value;
-                    params.watermark_path = document.querySelector('.param-watermark-path').value;
-                    params.output = document.querySelector('.param-output').value;
+                    params.position = card.querySelector('.param-position').value;
+                    params.watermark_path = card.querySelector('.param-watermark-path').value;
+                    params.output = card.querySelector('.param-output').value;
                     break;
                 case 'concat_videos':
-                    params.video1 = document.querySelector('.param-video1').value;
-                    params.video2 = document.querySelector('.param-video2').value;
-                    params.output = document.querySelector('.param-output').value;
+                    params.video1 = card.querySelector('.param-video1').value;
+                    params.video2 = card.querySelector('.param-video2').value;
+                    params.output = card.querySelector('.param-output').value;
                     break;
                 case 'adjust_volume':
-                    params.volume = document.querySelector('.param-volume').value;
-                    params.output = document.querySelector('.param-output').value;
+                    params.volume = card.querySelector('.param-volume').value;
+                    params.output = card.querySelector('.param-output').value;
                     break;
             }
 

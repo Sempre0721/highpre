@@ -12,7 +12,6 @@
     </script>
     
     <style>
-    /* 自定义字体 */
     @font-face {
         font-family: 'MiSans';
         src: url('/static/fonts/MiSans.ttf') format('truetype');
@@ -446,6 +445,11 @@
             });
     }
 
+    // 应用筛选条件
+    function applyFilter() {
+        loadHistory(1); // 重置到第一页并应用筛选
+    }
+
     // 显示历史记录
     function displayHistory(data) {
         // 转换数据格式以匹配前端显示需求
@@ -775,7 +779,7 @@
                     <input type="text" id="fileName" placeholder="输入文件名">
                 </div>
                 
-                <button class="filter-button" onclick="loadHistory(1)">筛选</button>
+                <button class="filter-button" onclick="applyFilter()">筛选</button>
             </div>
         </div>
 

@@ -129,33 +129,67 @@ def result():
 def history():
     return render_template('history.html')
 
-# 获取历史记录API
+# 获取历史记录
 @app.route('/api/history', methods=['GET'])
 def get_history():
     try:
-        conn = sqlite3.connect('history.db')
-        conn.row_factory = sqlite3.Row  # 使结果可以通过列名访问
-        cursor = conn.cursor()
-        
-        # 获取分页参数
+        # 获取分页和筛选参数
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 10, type=int)
+        operation_type = request.args.get('operation_type')
+        status = request.args.get('status')
+        file_name = request.args.get('file_name')
+
         offset = (page - 1) * per_page
-        
-        # 查询总数
-        cursor.execute('SELECT COUNT(*) FROM operation_history')
+
+        # 连接数据库
+        conn = sqlite3.connect('history.db')
+        conn.row_factory = sqlite3.Row
+        cursor = conn.cursor()
+
+        # 构造动态查询条件
+        query_conditions = []
+        query_params = []
+
+        if operation_type:
+            query_conditions.append("operation_type = ?")
+            query_params.append(operation_type)
+
+        if status:
+            query_conditions.append("status = ?")
+            query_params.append(status)
+
+        if file_name:
+            query_conditions.append("file_name LIKE ?")
+            query_params.append(f"%{file_name}%")  # 支持模糊匹配
+
+        # 构造完整 SQL 查询语句
+        where_clause = ''
+        if query_conditions:
+            where_clause = 'WHERE ' + ' AND '.join(query_conditions)
+
+        # 查询总数（带筛选）
+        count_sql = f"SELECT COUNT(*) FROM operation_history {where_clause}"
+        cursor.execute(count_sql, query_params)
         total = cursor.fetchone()[0]
-        
-        # 查询历史记录
-        cursor.execute('''
-            SELECT * FROM operation_history 
-            ORDER BY timestamp DESC 
+
+        # 查询分页数据（带筛选）
+        order_limit_sql = f'''
+            ORDER BY timestamp DESC
             LIMIT ? OFFSET ?
-        ''', (per_page, offset))
-        
+        '''
+        query_params.extend([per_page, offset])
+
+        final_sql = f'''
+            SELECT * FROM operation_history
+            {where_clause}
+            {order_limit_sql}
+        '''
+        cursor.execute(final_sql, query_params)
+
         records = cursor.fetchall()
         conn.close()
-        
+
         # 转换为字典列表
         history_data = []
         for record in records:
@@ -170,7 +204,7 @@ def get_history():
                 'file_name': record['file_name'],
                 'description': record['description']
             })
-        
+
         return jsonify({
             'code': 0,
             'message': '获取历史记录成功',
@@ -182,15 +216,223 @@ def get_history():
                 'total_pages': (total + per_page - 1) // per_page
             }
         })
-        
+
     except Exception as e:
-        logger.error(f"获取历史记录失败: {str(e)}")
+        app.logger.error(f"获取历史记录失败: {str(e)}")
         return jsonify({
             'code': 1001,
             'message': f'获取历史记录失败: {str(e)}'
         }), 500
 
+@app.route('/process_video', methods=['POST'])
+def process_video():
+    start_time = datetime.now()
+    data = request.get_json()
+    action = data.get('action')
+    video_path = data.get('video_path')
+    params = data.get('params', {})
+    
+    if not action:
+        return jsonify({
+            'code': 400,
+            'message': '缺少 action 参数'
+        }), 400
 
+    # 清空输出文件夹
+    clear_output_folder()
+
+    try:
+        # 构建 ffmpeg 命令
+        command = ['ffmpeg', '-i', video_path]
+        
+        output_path = params.get('output', f'output/{action}_output.mp4')
+        output_full_path = os.path.join(app.config['OUTPUT_FOLDER'], os.path.basename(output_path))
+        
+        # 确保输出目录存在
+        os.makedirs(os.path.dirname(output_full_path), exist_ok=True)
+        
+        # 根据不同操作构建命令参数
+        if action == 'extract_frames':
+            # 视频抽帧
+            fps = params.get('fps', 1)
+            command.extend(['-vf', f'fps={fps}'])
+            
+        elif action == 'convert_format':
+            # 转换格式
+            format_ext = params.get('format', 'mp4')
+            output_full_path = os.path.splitext(output_full_path)[0] + f'.{format_ext}'
+            
+        elif action == 'resize_video':
+            # 修改分辨率
+            width = params.get('width', 640)
+            height = params.get('height', 360)
+            keep_ratio = params.get('keep_ratio', True)
+            
+            if keep_ratio:
+                command.extend(['-vf', f'scale={width}:{height}:force_original_aspect_ratio=decrease,pad={width}:{height}:(ow-iw)/2:(oh-ih)/2'])
+            else:
+                command.extend(['-vf', f'scale={width}:{height}'])
+                
+        elif action == 'trim_video':
+            # 裁剪视频
+            start_time_val = params.get('start', 0)
+            end_time_val = params.get('end', 10)
+            duration = end_time_val - start_time_val
+            command.extend(['-ss', str(start_time_val), '-t', str(duration)])
+            
+        elif action == 'extract_audio':
+            # 分离音频
+            audio_format = params.get('format', 'mp3')
+            output_full_path = os.path.splitext(output_full_path)[0] + f'.{audio_format}'
+            command.extend(['-vn'])
+            
+        elif action == 'extract_gif':
+            # 提取 GIF
+            start_time_val = params.get('start', 0)
+            end_time_val = params.get('end', 5)
+            duration = end_time_val - start_time_val
+            command.extend(['-ss', str(start_time_val), '-t', str(duration), '-vf', 'fps=10,scale=320:-1:flags=lanczos'])
+            output_full_path = os.path.splitext(output_full_path)[0] + '.gif'
+            
+        elif action == 'adjust_bitrate':
+            # 调整码率
+            bitrate = params.get('bitrate', 1024)
+            command.extend(['-b:v', f'{bitrate}k'])
+            
+        elif action == 'add_watermark':
+            # 添加水印
+            watermark_path = params.get('watermark_path', 'watermark.png')
+            position = params.get('position', 'bottom_right')
+            
+            # 根据位置设置水印参数
+            positions = {
+                'top_left': '10:10',
+                'top_right': 'main_w-overlay_w-10:10',
+                'bottom_left': '10:main_h-overlay_h-10',
+                'bottom_right': 'main_w-overlay_w-10:main_h-overlay_h-10',
+                'center': '(main_w-overlay_w)/2:(main_h-overlay_h)/2'
+            }
+            pos = positions.get(position, positions['bottom_right'])
+            command.extend(['-vf', f"movie={watermark_path}[watermark];[in][watermark]overlay={pos}[out]"])
+            
+        elif action == 'concat_videos':
+            # 合并视频
+            video1_path = params.get('video1', 'video1.mp4')
+            video2_path = params.get('video2', 'video2.mp4')
+            
+            # 创建临时文件列表
+            list_file = os.path.join(app.config['OUTPUT_FOLDER'], 'file_list.txt')
+            with open(list_file, 'w') as f:
+                f.write(f"file '{video1_path}'\n")
+                f.write(f"file '{video2_path}'\n")
+            
+            command = ['ffmpeg', '-f', 'concat', '-safe', '0', '-i', list_file, '-c', 'copy']
+            output_full_path = os.path.join(app.config['OUTPUT_FOLDER'], 'merged_video.mp4')
+            
+        elif action == 'adjust_volume':
+            # 调整音量
+            volume = params.get('volume', 1.0)
+            command.extend(['-af', f'volume={volume}'])
+            
+        # 添加输出路径到命令
+        command.append(output_full_path)
+        
+        # 执行命令
+        result = subprocess.run(
+            command,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+            cwd=os.getcwd()
+        )
+        
+        if result.returncode != 0:
+            end_time = datetime.now()
+            duration = (end_time - start_time).total_seconds()
+            
+            # 记录历史
+            record_history(
+                operation_type='process_video',
+                input_data=data,
+                output_data={'error': result.stderr, 'command': ' '.join(command)},
+                status='failed',
+                duration=duration,
+                file_name=os.path.basename(video_path),
+                description=f'视频处理失败 - 操作: {action}'
+            )
+            
+            return jsonify({
+                'code': 500,
+                'message': '视频处理失败',
+                'error': result.stderr,
+                'command': ' '.join(command)
+            }), 500
+            
+        # 检查输出文件是否创建成功
+        if not os.path.exists(output_full_path):
+            end_time = datetime.now()
+            duration = (end_time - start_time).total_seconds()
+            
+            # 记录历史
+            record_history(
+                operation_type='process_video',
+                input_data=data,
+                output_data={'error': '输出文件未创建', 'output_path': output_full_path},
+                status='failed',
+                duration=duration,
+                file_name=os.path.basename(video_path),
+                description=f'视频处理完成但输出文件未创建 - 操作: {action}'
+            )
+            
+            return jsonify({
+                'code': 500,
+                'message': '视频处理完成但输出文件未创建',
+                'output_path': output_full_path
+            }), 500
+            
+        # 构建Web访问路径
+        web_output_path = f'/videos/output/{os.path.basename(output_full_path)}'
+        
+        end_time = datetime.now()
+        duration = (end_time - start_time).total_seconds()
+        
+        # 记录历史
+        record_history(
+            operation_type='process_video',
+            input_data=data,
+            output_data={'output_path': web_output_path},
+            status='success',
+            duration=duration,
+            file_name=os.path.basename(video_path),
+            description=f'视频处理成功 - 操作: {action}'
+        )
+        
+        return jsonify({
+            'code': 0,
+            'message': '处理成功',
+            'output_path': web_output_path
+        })
+        
+    except Exception as e:
+        end_time = datetime.now()
+        duration = (end_time - start_time).total_seconds()
+        
+        # 记录历史
+        record_history(
+            operation_type='process_video',
+            input_data=data,
+            output_data={'error': str(e)},
+            status='failed',
+            duration=duration,
+            file_name=os.path.basename(video_path) if video_path else None,
+            description=f'视频处理异常 - 操作: {action}'
+        )
+        
+        return jsonify({
+            'code': 500,
+            'message': f'处理过程中发生异常: {str(e)}'
+        }), 500
+    
 @app.route('/analyze_video_content', methods=['POST'])
 def analyze_video_content():
     """

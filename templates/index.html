@@ -17,8 +17,7 @@
         body {
             margin: 0;
             padding: 0;
-            background: url('/static/images/background.jpg') no-repeat center center fixed;
-            background-size: cover;
+            background-color: #000000; 
             color: white;
             font-family: 'MiSans', 'Segoe UI', sans-serif;
             height: 100vh;
@@ -126,11 +125,12 @@
             display: none;
             opacity: 0;
             transition: opacity 0.5s ease;
-            height: 100%;
-            width: 90vw; 
+            height: 99vh;
+            width: 176vh; 
             margin: 0 auto; 
             overflow: hidden;
             padding: 20px 0;
+            margin-top: 1vh;
             box-sizing: border-box;
         }
 
@@ -543,10 +543,10 @@
 
         .main-title {
             color: #39dcbb;
-            font-size: 300%;
             text-align: center;
             margin: 10px 0 20px 0;
             font-weight: bold;
+            font-size: clamp(24px, 4vw, 48px);
         }
     </style>
 </head>
@@ -839,9 +839,6 @@
             setTimeout(() => {
                 intro.style.opacity = 0;
                 intro.style.pointerEvents = 'none';
-
-                document.body.style.background = 'url("/static/images/background.jpg") no-repeat center center fixed';
-                document.body.style.backgroundSize = 'cover';
 
                 mainContent.style.display = 'block';
                 mainContent.style.opacity = '1';
