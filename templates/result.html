@@ -141,6 +141,14 @@
         margin-bottom: 20px;
         z-index: 20;
         position: relative;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease;
+    }
+
+    h1.show {
+        opacity: 1;
+        transform: translateY(0);
     }
 
     /* 卡片容器 */
@@ -306,7 +314,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>视频处理中心</h1>
+        <h1 id="pageTitle">视频处理中心</h1>
 
         <div class="video-container" id="videoContainer">
             <video id="resultVideo" controls autoplay></video>
@@ -494,6 +502,7 @@
         const videoContainer = document.getElementById('videoContainer');
         const nextBtn = document.getElementById('nextBtn');
         const cardsContainer = document.getElementById('cardsContainer');
+        const pageTitle = document.getElementById('pageTitle');
         
         videoElement.src = '../videos/output/cut_test.mp4';
 
@@ -502,8 +511,9 @@
             // 缩小视频容器
             videoContainer.classList.add('video-small');
             
-            // 显示卡片容器
+            // 显示标题和卡片容器
             setTimeout(() => {
+                pageTitle.classList.add('show');
                 cardsContainer.classList.add('show');
             }, 300);
             

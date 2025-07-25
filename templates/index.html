@@ -26,7 +26,6 @@
             position: relative;
         }
 
-        /* 添加赛博朋克背景效果 */
         body::before {
             content: "";
             position: absolute;
@@ -55,13 +54,11 @@
             animation: bg-animation 10s linear infinite;
         }
 
-        /* 添加故障效果 */
         @keyframes bg-animation {
             0% { background-position: 0 0; }
             100% { background-position: 100% 100%; }
         }
 
-        /* 开屏特效动画 */
         @keyframes screen-flicker {
             0% { opacity: 0; }
             5% { opacity: 0.2; }
@@ -178,7 +175,6 @@
             overflow-y: auto;
         }
 
-        /* 响应式设计 */
         @media (max-width: 1200px) {
             .content-wrapper {
                 gap: 15px;
@@ -219,7 +215,6 @@
             }
         }
 
-        /* 视频预览区域（始终 16:9） */
         .video-preview {
             width: 100%;
             max-width: 1000px;
@@ -240,7 +235,6 @@
             object-fit: contain;
         }
 
-        /* 按钮容器 */
         .upload-analyze-container {
             display: flex;
             justify-content: center;
@@ -286,7 +280,6 @@
             100% { opacity: 1; }
         }
         
-        /* 进度条样式 */
         .progress-container {
             width: 100%;
             max-width: 600px;
@@ -307,19 +300,16 @@
             box-shadow: 0 0 10px #00ffff;
         }
         
-        /* 禁用按钮样式 */
         .disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
         
-        /* 文件名文字颜色 */
         #fileName {
             color: #39dcbb;
             margin: 10px 0;
         }
         
-        /* 错误信息样式 */
         .error-message {
             color: #ff6b6b;
             background-color: rgba(255, 0, 0, 0.1);
@@ -335,7 +325,6 @@
             overflow: auto;
         }
         
-        /* 处理中提示 */
         .processing-text {
             color: #39dcbb;
             font-size: 18px;
@@ -343,7 +332,6 @@
             display: none;
         }
         
-        /* FFmpeg 参数面板样式 */
         .ffmpeg-params-panel {
             background-color: rgba(0, 0, 0, 0.7);
             border-radius: 10px;
@@ -472,7 +460,6 @@
             box-shadow: 0 0 15px #ff00ff;
         }
         
-        /* 文本显示区域 */
         .text-display {
             width: 100%;
             height: 150px;
@@ -492,7 +479,6 @@
             height: 100px;
         }
         
-        /* 自定义滚动条样式 */
         .left-sidebar::-webkit-scrollbar,
         .right-main-content::-webkit-scrollbar,
         .right-panel::-webkit-scrollbar {
@@ -514,14 +500,12 @@
             scrollbar-color: #00ffff rgba(0, 0, 0, 0.3);
         }
         
-        /* 卡片动效 - 赛博朋克风格 */
         .card {
             transition: all 0.3s ease;
             transform-origin: center;
             border: 1px solid transparent;
         }
 
-        /* 悬停时只轻微变化，不抖动 */
         .card:hover {
             transform: scale(1.02);
             box-shadow: 
@@ -531,13 +515,11 @@
             border: 1px solid #00ffff;
         }
 
-        /* 特定元素的霓虹效果 */
         .upload-btn-wrapper:hover img,
         .analyze-btn-wrapper:hover img {
             width: 100%;
         }
 
-        /* 为指定元素添加特定类名以便调整 */
         .ffmpeg-params-panel.custom-panel {
             width: 100%;
         }
@@ -550,7 +532,6 @@
             width: 100%;
         }
 
-        /* 移除按钮的悬停效果 */
         .upload-analyze-container .card:hover,
         .upload-btn-wrapper:hover,
         .analyze-btn-wrapper:hover,
@@ -560,33 +541,23 @@
             border: none;
         }
 
-        /* 故障效果应用于关键元素 */
-        .glitch-effect {
-            position: relative;
-        }
-        
-        /* 中间标题样式 */
         .main-title {
             color: #39dcbb;
             font-size: 300%;
             text-align: center;
             margin: 10px 0 20px 0;
-            
             font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <!-- 欢迎界面 -->
     <div class="intro" id="intro">
         <span class="line1" id="line1">欢迎使用</span><br>
         <span class="line2" id="line2">highpre智能AI剪辑系统</span>
     </div>
 
-    <!-- 主内容区域 -->
     <div class="main-content" id="mainContent">
         <div class="content-wrapper">
-            <!-- 左侧边栏 -->
             <div class="left-sidebar">
                 <div class="model-panel card custom-panel">
                     <div class="panel-header">
@@ -597,20 +568,28 @@
                         <label class="param-label">模型来源</label>
                         <select class="param-input" id="modelSource">
                             <option value="local" selected>Ollama</option>
-                            <option value="online">网络模型</option>
+                            <option value="xfyun">讯飞星火</option>
+                            <option value="tencent">腾讯云</option>
                         </select>
                     </div>
                     
                     <div class="param-group">
                         <label class="param-label">模型选择</label>
                         <select class="param-input" id="modelSelection">
-                            <option value="qwen2.5vl:3b" selected>qwen2.5vl:3b</option>
-                            <option value="gpt-4">GPT-4</option>
-                            <option value="claude-3">Claude 3</option>
-                            <option value="llama-3">Llama 3</option>
-                            <option value="gemini-pro">Gemini Pro</option>
-                            <option value="qwen-turbo">通义千问 Turbo</option>
-                            <option value="4.0Ultra">4.0Ultra</option>
+                            <!-- Ollama 模型 -->
+                            <option value="qwen2.5vl:3b" data-source="local" selected>qwen2.5vl:3b</option>
+                            <option value="llama3" data-source="local">Llama 3</option>
+                            <option value="mistral" data-source="local">Mistral</option>
+                            
+                            <!-- 讯飞星火模型 -->
+                            <option value="4.0Ultra" data-source="xfyun" selected>4.0 Ultra</option>
+                            <option value="3.5" data-source="xfyun">Spark 3.5</option>
+                            <option value="3.1" data-source="xfyun">Spark 3.1</option>
+                            
+                            <!-- 腾讯云模型 -->
+                            <option value="hunyuan-lite" data-source="tencent">Hunyuan Lite</option>
+                            <option value="hunyuan-standard" data-source="tencent">Hunyuan Standard</option>
+                            <option value="hunyuan-pro" data-source="tencent">Hunyuan Pro</option>
                         </select>
                     </div>
                     
@@ -655,39 +634,29 @@
                 </div>
             </div>
             
-            <!-- 中间主面板 -->
             <div class="right-main-content custom-content">
-                <!-- 添加标题 -->
                 <div class="main-title">highpre帮您高效处理视频素材</div>
                 
-                <!-- 视频预览区域 -->
                 <div class="video-preview card" id="videoPreview"></div>
                 
-                <!-- 处理中提示 -->
                 <div class="processing-text" id="processingText">后台处理中，请稍候...</div>
                 
-                <!-- 进度条 -->
                 <div class="progress-container" id="progressContainer">
                     <div class="progress-bar" id="progressBar"></div>
                 </div>
                 
-                <!-- 错误信息显示 -->
                 <div class="error-message" id="errorMessage"></div>
 
-                <!-- 按钮容器 -->
                 <div class="upload-analyze-container">
-                    <!-- 上传按钮 -->
                     <div class="upload-btn-wrapper" id="uploadBtnWrapper">
                         <img src="static/images/upload-icon.png" alt="选择视频">
                         <input type="file" accept="video/*" id="videoInput">
                     </div>
 
-                    <!-- 分析按钮 -->
                     <div class="analyze-btn-wrapper" id="analyzeBtnWrapper">
                         <img src="static/images/analyze-icon.png" alt="分析视频">
                     </div>
                     
-                    <!-- 剪辑按钮 -->
                     <div class="analyze-btn-wrapper" id="cutBtnWrapper">
                         <img src="static/images/analyze-icon.png" alt="剪辑视频">
                     </div>
@@ -695,13 +664,10 @@
 
                 <p id="fileName"></p>
 
-                <!-- 剪辑视频展示区域 -->
                 <div id="cutVideoContainer" class="video-preview card" style="margin-top: 30px;"></div>
             </div>
             
-            <!-- 右侧参数面板 -->
             <div class="right-panel">
-                <!-- FFmpeg 参数面板 -->
                 <div class="ffmpeg-params-panel card custom-panel" id="ffmpegParamsPanel">
                     <div class="panel-header">
                         <div class="panel-title">FFmpeg 参数设置</div>
@@ -784,7 +750,6 @@
                     
                     <button class="reset-btn" id="resetParamsBtn">重置为默认值</button>
                 </div>
-                <!-- 文本显示区域 -->
                 <textarea class="text-display card" id="textDisplay" placeholder="处理信息将显示在这里..."></textarea>
             </div>
         </div>
@@ -792,9 +757,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            console.log("DOM 加载完成");
-
-            // DOM 元素引用
             const intro = document.querySelector('.intro');
             const line1 = document.getElementById('line1');
             const line2 = document.getElementById('line2');
@@ -812,12 +774,10 @@
             const processingText = document.getElementById('processingText');
             const textDisplay = document.getElementById('textDisplay');
 
-            // FFmpeg 参数相关元素
             const advancedToggle = document.getElementById('advancedToggle');
             const advancedParams = document.getElementById('advancedParams');
             const resetParamsBtn = document.getElementById('resetParamsBtn');
             
-            // 参数输入元素
             const videoCodec = document.getElementById('videoCodec');
             const audioCodec = document.getElementById('audioCodec');
             const crfValue = document.getElementById('crfValue');
@@ -827,11 +787,9 @@
             const movFlags = document.getElementById('movFlags');
             const otherParams = document.getElementById('otherParams');
             
-            // 时间参数元素
             const startTime = document.getElementById('startTime');
             const endTime = document.getElementById('endTime');
             
-            // 模型参数元素
             const modelSource = document.getElementById('modelSource');
             const modelSelection = document.getElementById('modelSelection');
             const editingRequirements = document.getElementById('editingRequirements');
@@ -844,11 +802,9 @@
             const maxTokens = document.getElementById('maxTokens');
             const keywordWeights = document.getElementById('keywordWeights');
 
-            // 状态变量
             let currentVideo = null;
             let selectedFilePath = null;
             
-            // FFmpeg 参数对象
             let ffmpegParams = {
                 videoCodec: 'libx264',
                 audioCodec: 'aac',
@@ -861,7 +817,6 @@
                 endTime: 10
             };
             
-            // 模型参数对象
             let modelParams = {
                 source: 'local',
                 model: 'qwen2.5vl:3b',
@@ -874,44 +829,36 @@
                 keywords: ''
             };
 
-            // 初始时禁用分析按钮和剪辑按钮
             analyzeBtnWrapper.classList.add('disabled');
             cutBtnWrapper.classList.add('disabled');
 
-            // 显示欢迎动画
             setTimeout(() => {
                 intro.style.opacity = 1;
             }, 100);
 
-            // 动画结束后显示主内容
             setTimeout(() => {
                 intro.style.opacity = 0;
                 intro.style.pointerEvents = 'none';
 
-                // 恢复背景亮度
                 document.body.style.background = 'url("/static/images/background.jpg") no-repeat center center fixed';
                 document.body.style.backgroundSize = 'cover';
 
-                // 显示主内容
                 mainContent.style.display = 'block';
                 mainContent.style.opacity = '1';
             }, 4000);
 
-            // 文件选择处理
             videoInput.addEventListener('change', function () {
                 const file = videoInput.files[0];
                 if (!file) return;
 
                 fileName.textContent = '已选择视频: ' + file.name;
 
-                // 清除旧视频
                 if (currentVideo) {
                     currentVideo.pause();
                     currentVideo.srcObject = null;
                     currentVideo = null;
                 }
 
-                // 创建文件访问 URL 用于预览
                 const videoURL = URL.createObjectURL(file);
                 const videoElement = document.createElement('video');
                 videoElement.src = videoURL;
@@ -924,26 +871,20 @@
                 videoPreview.appendChild(videoElement);
                 currentVideo = videoElement;
 
-                // 启用分析按钮和剪辑按钮
                 analyzeBtnWrapper.classList.remove('disabled');
                 cutBtnWrapper.classList.remove('disabled');
                 
-                // 保存文件路径信息
                 selectedFilePath = file.name;
                 
-                // 隐藏错误信息
                 errorMessage.style.display = 'none';
                 
-                // 更新结束时间为视频时长
                 videoElement.addEventListener('loadedmetadata', function() {
                     endTime.value = Math.floor(videoElement.duration * 10) / 10;
                     ffmpegParams.endTime = endTime.value;
                 });
             });
 
-            // 分析按钮点击事件 - 调用相应 API
             analyzeBtnWrapper.addEventListener('click', function () {
-                // 如果按钮被禁用，则不执行任何操作
                 if (analyzeBtnWrapper.classList.contains('disabled')) {
                     return;
                 }
@@ -953,17 +894,22 @@
                     return;
                 }
 
-                // 根据模型来源调用相应 API
-                if (modelSource.value === 'local') {
-                    callOllamaAPI();
-                } else {
-                    callXfyunAPI();
+                switch(modelSource.value) {
+                    case 'local':
+                        callOllamaAPI();
+                        break;
+                    case 'xfyun':
+                        callXfyunAPI();
+                        break;
+                    case 'tencent':
+                        callTencentAPI();
+                        break;
+                    default:
+                        callOllamaAPI();
                 }
             });
             
-            // 剪辑按钮点击事件
             cutBtnWrapper.addEventListener('click', function () {
-                // 如果按钮被禁用，则不执行任何操作
                 if (cutBtnWrapper.classList.contains('disabled')) {
                     return;
                 }
@@ -973,7 +919,6 @@
                     return;
                 }
 
-                // 获取用户设置的时间参数
                 const start = parseFloat(startTime.value);
                 const end = parseFloat(endTime.value);
                 
@@ -982,11 +927,9 @@
                     return;
                 }
 
-                // 调用服务器端剪辑功能
                 cutVideoOnServer(start, end, selectedFilePath);
             });
 
-            // 切换高级参数显示
             advancedToggle.addEventListener('click', function() {
                 if (advancedParams.style.display === 'none') {
                     advancedParams.style.display = 'block';
@@ -997,7 +940,6 @@
                 }
             });
             
-            // CRF 值同步
             crfValue.addEventListener('input', function() {
                 crfSlider.value = crfValue.value;
                 ffmpegParams.crf = parseInt(crfValue.value);
@@ -1008,7 +950,6 @@
                 ffmpegParams.crf = parseInt(crfSlider.value);
             });
             
-            // 时间参数同步
             startTime.addEventListener('input', function() {
                 ffmpegParams.startTime = parseFloat(startTime.value) || 0;
             });
@@ -1017,7 +958,6 @@
                 ffmpegParams.endTime = parseFloat(endTime.value) || 10;
             });
             
-            // 其他参数同步
             videoCodec.addEventListener('change', function() {
                 ffmpegParams.videoCodec = videoCodec.value;
             });
@@ -1042,9 +982,26 @@
                 ffmpegParams.otherParams = otherParams.value;
             });
             
-            // 模型参数同步
             modelSource.addEventListener('change', function() {
                 modelParams.source = modelSource.value;
+                
+                const options = modelSelection.querySelectorAll('option');
+                options.forEach(option => {
+                    if (option.dataset.source === modelSource.value) {
+                        option.style.display = '';
+                    } else {
+                        option.style.display = 'none';
+                    }
+                });
+                
+                const visibleOptions = Array.from(options).filter(option => 
+                    option.dataset.source === modelSource.value
+                );
+                
+                if (visibleOptions.length > 0) {
+                    modelSelection.value = visibleOptions[0].value;
+                    modelParams.model = visibleOptions[0].value;
+                }
             });
 
             modelSelection.addEventListener('change', function() {
@@ -1059,7 +1016,6 @@
                 modelParams.clipLength = parseInt(expectedClipLength.value) || 30;
             });
 
-            // 温度值同步
             modelTemperature.addEventListener('input', function() {
                 temperatureSlider.value = parseFloat(modelTemperature.value) * 10;
                 modelParams.temperature = parseFloat(modelTemperature.value);
@@ -1074,7 +1030,6 @@
                 modelParams.seed = parseInt(randomSeed.value) || 42;
             });
 
-            // Top-P值同步
             topP.addEventListener('input', function() {
                 topPSlider.value = parseFloat(topP.value) * 100;
                 modelParams.topP = parseFloat(topP.value);
@@ -1093,7 +1048,6 @@
                 modelParams.keywords = keywordWeights.value;
             });
             
-            // 重置参数
             resetParamsBtn.addEventListener('click', function() {
                 videoCodec.value = 'libx264';
                 audioCodec.value = 'aac';
@@ -1106,7 +1060,6 @@
                 startTime.value = 0;
                 endTime.value = 10;
                 
-                // 更新参数对象
                 ffmpegParams = {
                     videoCodec: 'libx264',
                     audioCodec: 'aac',
@@ -1122,16 +1075,12 @@
                 textDisplay.value += "参数已重置为默认值\n";
             });
 
-            // 调用 Ollama API
             function callOllamaAPI() {
-                // 显示处理中提示
                 processingText.style.display = 'block';
                 textDisplay.value = "正在请求AI分析...\n";
                 
-                // 禁用分析按钮防止重复点击
                 analyzeBtnWrapper.classList.add('disabled');
                 
-                // 准备发送给后端的数据
                 const requestData = {
                     prompt: editingRequirements.value || "请分析这个视频并提供剪辑建议",
                     model: modelSelection.value,
@@ -1149,32 +1098,24 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // 恢复分析按钮
                     analyzeBtnWrapper.classList.remove('disabled');
                     
-                    // 隐藏处理中提示
                     processingText.style.display = 'none';
                     
                     if (data.code === 0) {
-                        console.log('AI 分析成功:', data);
-                        // 提取并显示实际的分析结果
                         if (data.data && data.data.response) {
                             textDisplay.value += "AI 分析结果:\n" + data.data.response + "\n";
                         }
                         
-                        // 隐藏错误信息
                         errorMessage.style.display = 'none';
                     } else {
-                        // 显示错误信息
                         errorMessage.textContent = `AI 分析失败: ${data.message}`;
                         errorMessage.style.display = 'block';
                         textDisplay.value += "AI 分析失败: " + data.message + "\n";
-                        console.error('AI 分析失败:', data);
                         alert('AI 分析失败: ' + data.message);
                     }
                 })
                 .catch(error => {
-                    // 恢复分析按钮
                     analyzeBtnWrapper.classList.remove('disabled');
                     
                     errorMessage.textContent = `网络错误: ${error.message}`;
@@ -1182,20 +1123,15 @@
                     textDisplay.value += "网络错误: " + error.message + "\n";
                     textDisplay.value += "错误详情: " + JSON.stringify(error, null, 2) + "\n";
                     alert('调用 AI 分析接口失败: ' + error.message);
-                    console.error(error);
                 });
             }
             
-            // 调用讯飞星火 API
             function callXfyunAPI() {
-                // 显示处理中提示
                 processingText.style.display = 'block';
                 textDisplay.value = "正在请求AI分析...\n";
                 
-                // 禁用分析按钮防止重复点击
                 analyzeBtnWrapper.classList.add('disabled');
                 
-                // 准备发送给后端的数据
                 const requestData = {
                     prompt: editingRequirements.value || "请分析这个视频并提供剪辑建议",
                     model: modelSelection.value,
@@ -1212,32 +1148,24 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // 恢复分析按钮
                     analyzeBtnWrapper.classList.remove('disabled');
                     
-                    // 隐藏处理中提示
                     processingText.style.display = 'none';
                     
                     if (data.code === 0) {
-                        console.log('AI 分析成功:', data);
-                        // 提取并显示实际的分析结果
                         if (data.data && data.data.response) {
                             textDisplay.value += "AI 分析结果:\n" + data.data.response + "\n";
                         }
                         
-                        // 隐藏错误信息
                         errorMessage.style.display = 'none';
                     } else {
-                        // 显示错误信息
                         errorMessage.textContent = `AI 分析失败: ${data.message}`;
                         errorMessage.style.display = 'block';
                         textDisplay.value += "AI 分析失败: " + data.message + "\n";
-                        console.error('AI 分析失败:', data);
                         alert('AI 分析失败: ' + data.message);
                     }
                 })
                 .catch(error => {
-                    // 恢复分析按钮
                     analyzeBtnWrapper.classList.remove('disabled');
                     
                     errorMessage.textContent = `网络错误: ${error.message}`;
@@ -1245,22 +1173,67 @@
                     textDisplay.value += "网络错误: " + error.message + "\n";
                     textDisplay.value += "错误详情: " + JSON.stringify(error, null, 2) + "\n";
                     alert('调用 AI 分析接口失败: ' + error.message);
-                    console.error(error);
                 });
             }
             
-            // 在服务器端剪辑视频
+            function callTencentAPI() {
+                processingText.style.display = 'block';
+                textDisplay.value = "正在请求AI分析...\n";
+                
+                analyzeBtnWrapper.classList.add('disabled');
+                
+                const requestData = {
+                    prompt: editingRequirements.value || "请分析这个视频并提供剪辑建议",
+                    model: modelSelection.value,
+                    temperature: parseFloat(modelTemperature.value),
+                    maxTokens: parseInt(maxTokens.value)
+                };
+                
+                fetch('/tencent', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    analyzeBtnWrapper.classList.remove('disabled');
+                    
+                    processingText.style.display = 'none';
+                    
+                    if (data.code === 0) {
+                        if (data.data && data.data.response) {
+                            textDisplay.value += "AI 分析结果:\n" + data.data.response + "\n";
+                        }
+                        
+                        errorMessage.style.display = 'none';
+                    } else {
+                        errorMessage.textContent = `AI 分析失败: ${data.message}`;
+                        errorMessage.style.display = 'block';
+                        textDisplay.value += "AI 分析失败: " + data.message + "\n";
+                        alert('AI 分析失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    analyzeBtnWrapper.classList.remove('disabled');
+                    
+                    errorMessage.textContent = `网络错误: ${error.message}`;
+                    errorMessage.style.display = 'block';
+                    textDisplay.value += "网络错误: " + error.message + "\n";
+                    textDisplay.value += "错误详情: " + JSON.stringify(error, null, 2) + "\n";
+                    alert('调用 AI 分析接口失败: ' + error.message);
+                });
+            }
+            
             function cutVideoOnServer(start, end, filename) {
-                // 显示进度条和处理中提示
                 progressContainer.style.display = 'block';
                 processingText.style.display = 'block';
                 progressBar.style.width = '0%';
                 textDisplay.value = "开始处理视频...\n";
                 
-                // 禁用剪辑按钮防止重复点击
                 cutBtnWrapper.classList.add('disabled');
                 
-                // 模拟进度条动画
                 let progress = 0;
                 const interval = setInterval(() => {
                     progress += Math.random() * 10;
@@ -1286,64 +1259,46 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    // 停止进度条动画并完成
                     clearInterval(interval);
                     progressBar.style.width = '100%';
                     
-                    // 延迟隐藏进度条，让用户看到完成状态
                     setTimeout(() => {
                         progressContainer.style.display = 'none';
                         processingText.style.display = 'none';
                     }, 500);
                     
-                    // 恢复剪辑按钮
                     cutBtnWrapper.classList.remove('disabled');
                     
                     if (data.code === 0) {
-                        console.log('剪辑成功:', data.data.output);
-                        textDisplay.value += "视频剪辑成功!\n输出路径: " + data.data.output + "\n";
+                        textDisplay.value += "视频剪辑成功!\n输出路径: " + data.data.output + "\n"+"点击跳转界面";
                         
-                        // 隐藏错误信息
                         errorMessage.style.display = 'none';
                         
-                        // 打开结果页面
-                        window.open('http://127.0.0.1:5839/result', '_blank');
+                        //window.open('http://127.0.0.1:5839/result', '_blank');
+                        window.location.href = 'http://127.0.0.1:5839/result';
                     } else {
-                        // 显示错误信息
                         errorMessage.textContent = `剪辑失败: ${data.message}\n${data.error || ''}`;
                         errorMessage.style.display = 'block';
                         textDisplay.value += "剪辑失败: " + data.message + "\n";
-                        console.error('剪辑失败:', data);
                         alert('剪辑失败: ' + data.message);
                     }
                 })
                 .catch(error => {
-                    // 停止进度条动画
                     clearInterval(interval);
                     
-                    // 隐藏进度条
                     progressContainer.style.display = 'none';
                     processingText.style.display = 'none';
                     
-                    // 恢复剪辑按钮
                     cutBtnWrapper.classList.remove('disabled');
                     
                     errorMessage.textContent = `网络错误: ${error.message}`;
                     errorMessage.style.display = 'block';
                     textDisplay.value += "网络错误: " + error.message + "\n";
                     alert('调用剪辑接口失败: ' + error.message);
-                    console.error(error);
                 });
-            }
-            
-            // 空函数预留，供后续开发使用
-            function updateModelSettings() {
-                // TODO: 后续实现模型设置的更新逻辑
-                console.log("模型设置已更新:", modelParams);
             }
 
             function resetModelParams() {
-                // 重置模型参数为默认值
                 modelSource.value = 'local';
                 modelSelection.value = 'qwen2.5vl:3b';
                 editingRequirements.value = '';
@@ -1356,7 +1311,6 @@
                 maxTokens.value = 1024;
                 keywordWeights.value = '';
                 
-                // 更新参数对象
                 modelParams = {
                     source: 'local',
                     model: 'qwen2.5vl:3b',

@@ -1,0 +1,36 @@
+{
+"server": {
+    "host": "0.0.0.0",
+    "port": 5839,
+    "debug": true
+},
+"folders": {
+    "input": "videos/input",
+    "output": "videos/output"
+},
+"models": {
+    "ollama": {
+    "default_model": "qwen2.5vl:3b"
+    },
+    "xfyun": {
+    "api_key": "EofwojbrKQpYiFdIGBNW:WxSxTTMZBTooLcoiFWEd",
+    "base_url": "https://spark-api-open.xf-yun.com/v1",
+    "default_model": "4.0Ultra"
+    },
+    "tencent": {
+    "api_key": "YOUR_TENCENT_API_KEY",
+    "base_url": "https://api.hunyuan.cloud.tencent.com/v1",
+    "default_model": "hunyuan-lite"
+    }
+},
+"ffmpeg": {
+    "default_params": {
+    "videoCodec": "libx264",
+    "audioCodec": "aac",
+    "preset": "fast",
+    "crf": 23,
+    "pixFmt": "yuv420p",
+    "movFlags": "+faststart"
+    }
+}
+}

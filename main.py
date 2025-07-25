@@ -1,12 +1,26 @@
 # main.py
-from flask import Flask, render_template, request, jsonify, send_from_directory
-import ollama
-import subprocess
+import json
 import os
-from werkzeug.utils import secure_filename
 import logging
 import shutil
+import subprocess
+from flask import Flask, render_template, request, jsonify, send_from_directory
+import ollama
 from openai import OpenAI
+
+# 加载配置文件
+def load_config():
+    """加载配置文件"""
+    try:
+        with open('config.json', 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise FileNotFoundError("配置文件 config.json 未找到")
+    except json.JSONDecodeError:
+        raise ValueError("配置文件 config.json 格式错误")
+
+# 加载配置
+config = load_config()
 
 # 配置日志
 logging.basicConfig(level=logging.DEBUG)
@@ -14,9 +28,10 @@ logger = logging.getLogger(__name__)
 
 def clear_output_folder():
     """清空输出文件夹"""
-    if os.path.exists(app.config['OUTPUT_FOLDER']):
-        for filename in os.listdir(app.config['OUTPUT_FOLDER']):
-            file_path = os.path.join(app.config['OUTPUT_FOLDER'], filename)
+    output_folder = config['folders']['output']
+    if os.path.exists(output_folder):
+        for filename in os.listdir(output_folder):
+            file_path = os.path.join(output_folder, filename)
             try:
                 if os.path.isfile(file_path) or os.path.islink(file_path):
                     os.unlink(file_path)
@@ -28,8 +43,8 @@ def clear_output_folder():
 app = Flask(__name__)
 
 # 配置文件夹
-INPUT_FOLDER = 'videos/input'
-OUTPUT_FOLDER = 'videos/output'
+INPUT_FOLDER = config['folders']['input']
+OUTPUT_FOLDER = config['folders']['output']
 app.config['INPUT_FOLDER'] = INPUT_FOLDER
 app.config['OUTPUT_FOLDER'] = OUTPUT_FOLDER
 
@@ -58,7 +73,7 @@ def result():
 def chat_with_ollama():
     data = request.get_json()
     prompt = data.get('prompt')
-    model = data.get('model', 'qwen2.5vl:3b')
+    model = data.get('model', config['models']['ollama']['default_model'])
     temperature = data.get('temperature', 0.7)
     seed = data.get('seed', 42)
     max_tokens = data.get('maxTokens', 1024)
@@ -100,7 +115,7 @@ def chat_with_ollama():
 def chat_with_xfyun():
     data = request.get_json()
     prompt = data.get('prompt')
-    model = data.get('model', '4.0Ultra')
+    model = data.get('model', config['models']['xfyun']['default_model'])
     temperature = data.get('temperature', 0.7)
     max_tokens = data.get('maxTokens', 1024)
 
@@ -113,8 +128,8 @@ def chat_with_xfyun():
     try:
         # 初始化讯飞星火客户端
         client = OpenAI(
-            api_key="EofwojbrKQpYiFdIGBNW:WxSxTTMZBTooLcoiFWEd",
-            base_url='https://spark-api-open.xf-yun.com/v1'
+            api_key=config['models']['xfyun']['api_key'],
+            base_url=config['models']['xfyun']['base_url']
         )
         
         # 生成回复
@@ -142,6 +157,55 @@ def chat_with_xfyun():
         return jsonify({
             'code': 1002,
             'message': f'调用讯飞星火 API 失败: {str(e)}'
+        }), 500
+
+# 调用腾讯云大模型
+@app.route('/tencent', methods=['POST'])
+def chat_with_tencent():
+    data = request.get_json()
+    prompt = data.get('prompt')
+    model = data.get('model', config['models']['tencent']['default_model'])
+    temperature = data.get('temperature', 0.7)
+    max_tokens = data.get('maxTokens', 1024)
+
+    if not prompt:
+        return jsonify({
+            'code': 1001,
+            'message': '缺少 prompt 参数'
+        }), 400
+
+    try:
+        # 初始化腾讯云客户端
+        client = OpenAI(
+            api_key=config['models']['tencent']['api_key'],
+            base_url=config['models']['tencent']['base_url']
+        )
+        
+        # 生成回复
+        completion = client.chat.completions.create(
+            model=model,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
+
+        return jsonify({
+            'code': 0,
+            'message': '成功获取模型回复',
+            'data': {
+                'response': completion.choices[0].message.content.strip()
+            }
+        })
+
+    except Exception as e:
+        return jsonify({
+            'code': 1002,
+            'message': f'调用腾讯云 API 失败: {str(e)}'
         }), 500
 
 @app.route('/cut_video', methods=['POST'])
@@ -190,11 +254,11 @@ def cut_video():
     ]
     
     # 添加视频编码器参数
-    video_codec = ffmpeg_params.get('videoCodec', 'libx264')
+    video_codec = ffmpeg_params.get('videoCodec', config['ffmpeg']['default_params']['videoCodec'])
     command.extend(['-c:v', video_codec])
     
     # 添加音频编码器参数
-    audio_codec = ffmpeg_params.get('audioCodec', 'aac')
+    audio_codec = ffmpeg_params.get('audioCodec', config['ffmpeg']['default_params']['audioCodec'])
     command.extend(['-c:a', audio_codec])
     
     # 添加其他参数
@@ -202,19 +266,19 @@ def cut_video():
         command.extend(['-strict', 'experimental'])
     
     # 添加预设参数
-    preset = ffmpeg_params.get('preset', 'fast')
+    preset = ffmpeg_params.get('preset', config['ffmpeg']['default_params']['preset'])
     command.extend(['-preset', preset])
     
     # 添加CRF参数
-    crf = ffmpeg_params.get('crf', 23)
+    crf = ffmpeg_params.get('crf', config['ffmpeg']['default_params']['crf'])
     command.extend(['-crf', str(crf)])
     
     # 添加像素格式参数
-    pix_fmt = ffmpeg_params.get('pixFmt', 'yuv420p')
+    pix_fmt = ffmpeg_params.get('pixFmt', config['ffmpeg']['default_params']['pixFmt'])
     command.extend(['-pix_fmt', pix_fmt])
     
     # 添加movflags参数
-    mov_flags = ffmpeg_params.get('movFlags', '+faststart')
+    mov_flags = ffmpeg_params.get('movFlags', config['ffmpeg']['default_params']['movFlags'])
     command.extend(['-movflags', mov_flags])
     
     # 添加其他自定义参数
@@ -279,4 +343,8 @@ def cut_video():
         }), 500
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5839, debug=True)
+    app.run(
+        host=config['server']['host'],
+        port=config['server']['port'],
+        debug=config['server']['debug']
+    )
