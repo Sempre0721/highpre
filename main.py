@@ -52,7 +52,6 @@ def init_database():
 
 # 记录操作历史
 def record_history(operation_type, input_data, output_data, status, duration, file_name, description):
-    """记录操作历史"""
     conn = sqlite3.connect('history.db')
     cursor = conn.cursor()
     
