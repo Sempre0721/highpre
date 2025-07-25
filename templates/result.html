@@ -536,42 +536,49 @@
             const knobValue = document.getElementById('volumeValue');
             const volumeInput = document.querySelector('.param-volume');
             let isDragging = false;
-            let startAngle = 0;
+            let startY = 0;
             let startValue = 1.0;
-            
+            const sensitivity = 0.02;
+
             // 设置初始旋钮角度
             updateKnob(1.0);
-            
+
             knob.addEventListener('mousedown', function(e) {
+                e.preventDefault(); // 阻止默认文本选择行为
                 isDragging = true;
-                const rect = knob.getBoundingClientRect();
-                const centerX = rect.left + rect.width / 2;
-                const centerY = rect.top + rect.height / 2;
-                startAngle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI;
+                startY = e.clientY;
                 startValue = parseFloat(volumeInput.value);
+                knob.style.cursor = 'grabbing';
             });
-            
+
             document.addEventListener('mousemove', function(e) {
                 if (isDragging) {
-                    const rect = knob.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
-                    const angle = Math.atan2(e.clientY - centerY, e.clientX - centerX) * 180 / Math.PI;
-                    const delta = (angle - startAngle) / 180; // 180度对应0-2的范围
-                    let newValue = startValue + delta * 2;
+                    e.preventDefault(); // 阻止默认文本选择行为
+                    const deltaY = startY - e.clientY; // 向上拖动为正
+                    let newValue = startValue + deltaY * sensitivity;
                     newValue = Math.min(3.0, Math.max(0.0, newValue)); // 限制在0.0-3.0之间
                     updateKnob(newValue);
                 }
             });
-            
+
             document.addEventListener('mouseup', function() {
-                isDragging = false;
+                if (isDragging) {
+                    isDragging = false;
+                    knob.style.cursor = 'grab';
+                }
             });
-            
+
+            document.addEventListener('mouseleave', function() {
+                if (isDragging) {
+                    isDragging = false;
+                    knob.style.cursor = 'grab';
+                }
+            });
+
             function updateKnob(value) {
                 volumeInput.value = value.toFixed(1);
                 knobValue.textContent = value.toFixed(1);
-                const rotation = (value - 1.0) * 90; // 1.0为中心点，对应0度旋转
+                const rotation = (value * 120) + 180; // 0值对应180度(竖直向下)，3值对应540度(180度+360度)
                 knob.style.transform = `rotate(${rotation}deg)`;
             }
         });
