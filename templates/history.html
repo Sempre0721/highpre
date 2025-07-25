@@ -1,0 +1,721 @@
+<!-- templates/history.html -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>操作历史 - highpre智能AI剪辑</title>
+    <link rel="icon" href="static/favicon.svg" type="image/svg+xml">
+    <script
+    async
+    defer
+    src="https://hyrealkb.digiplc.cn/api/application/embed?protocol=https&host=hyrealkb.digiplc.cn&token=8becb83252d565c2">
+    </script>
+    <style>
+        /* 自定义字体 */
+        @font-face {
+            font-family: 'MiSans';
+            src: url('/static/fonts/MiSans.ttf') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        /* 页面基础样式 */
+        body {
+            margin: 0;
+            padding: 0;
+            background: #000;
+            color: white;
+            font-family: 'MiSans', 'Segoe UI', sans-serif;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        /* 赛博朋克风格背景网格效果 */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 255, 255, 0.05) 2px, rgba(0, 255, 255, 0.05) 4px),
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255, 0, 255, 0.05) 2px, rgba(255, 0, 255, 0.05) 4px);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* 页面内容容器 */
+        .container {
+            padding: 20px;
+            z-index: 1;
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 页面标题 */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 10px 0;
+            border-bottom: 1px solid #00ffff;
+        }
+
+        .page-header h1 {
+            color: #39dcbb;
+            text-shadow: 0 0 2px #00ffff;
+            margin: 0;
+        }
+
+        /* 导航按钮 */
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .nav-btn {
+            background-color: #39dcbb;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-family: 'MiSans', sans-serif;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background-color: #2db09d;
+            transform: scale(1.05);
+        }
+
+        /* 筛选区域 */
+        .filter-section {
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #00ffff;
+        }
+
+        .filter-section h2 {
+            color: #39dcbb;
+            margin-top: 0;
+        }
+
+        .filter-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            margin-bottom: 5px;
+            color: #39dcbb;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #00ffff;
+            background-color: #333;
+            color: white;
+            font-family: 'MiSans', sans-serif;
+        }
+
+        .filter-button {
+            background-color: #39dcbb;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'MiSans', sans-serif;
+            font-weight: bold;
+            height: fit-content;
+        }
+
+        .filter-button:hover {
+            background-color: #2db09d;
+        }
+
+        /* 历史记录表格 */
+        .history-table-container {
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #00ffff;
+            overflow-x: auto;
+        }
+
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            color: white;
+        }
+
+        .history-table th {
+            background-color: rgba(57, 220, 187, 0.2);
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #00ffff;
+            color: #39dcbb;
+        }
+
+        .history-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+        }
+
+        .history-table tr:hover {
+            background-color: rgba(0, 255, 255, 0.1);
+        }
+
+        .status-success {
+            color: #39dcbb;
+            font-weight: bold;
+        }
+
+        .status-failed {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+        .operation-type {
+            background-color: rgba(57, 220, 187, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #39dcbb;
+        }
+
+        /* 分页控件 */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            gap: 10px;
+        }
+
+        .pagination button {
+            background-color: rgba(57, 220, 187, 0.2);
+            color: white;
+            border: 1px solid #39dcbb;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'MiSans', sans-serif;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background-color: rgba(57, 220, 187, 0.4);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination .current-page {
+            color: #39dcbb;
+            font-weight: bold;
+            padding: 8px 12px;
+        }
+
+        /* 详情弹窗 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: #111;
+            border-radius: 10px;
+            border: 1px solid #00ffff;
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #39dcbb;
+        }
+
+        .modal-title {
+            color: #39dcbb;
+            margin-top: 0;
+            padding-right: 30px;
+        }
+
+        .modal-section {
+            margin-bottom: 20px;
+        }
+
+        .modal-section h3 {
+            color: #39dcbb;
+            margin-bottom: 10px;
+        }
+
+        .modal-section pre {
+            background-color: #222;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        /* 加载提示 */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #39dcbb;
+        }
+
+        /* 错误提示 */
+        .error-message {
+            background-color: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff6b6b;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 20px 0;
+            color: #ff6b6b;
+            text-align: center;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .page-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+            
+            .filter-controls {
+                flex-direction: column;
+            }
+            
+            .filter-group {
+                width: 100%;
+            }
+            
+            .history-table {
+                font-size: 14px;
+            }
+            
+            .history-table th,
+            .history-table td {
+                padding: 8px;
+            }
+        }
+    </style>
+    <script>
+        // 全局变量
+        let currentPage = 1;
+        const pageSize = 10;
+        let historyData = [];
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadHistory();
+        });
+
+        // 加载历史记录
+        function loadHistory(page = 1) {
+            currentPage = page;
+            
+            // 显示加载状态
+            document.getElementById('historyContent').innerHTML = '<div class="loading">正在加载历史记录...</div>';
+            
+            // 获取筛选条件
+            const operationType = document.getElementById('operationType').value;
+            const status = document.getElementById('status').value;
+            const fileName = document.getElementById('fileName').value;
+            
+            // 构造请求参数
+            const params = {
+                page: page,
+                pageSize: pageSize,
+                operationType: operationType || undefined,
+                status: status || undefined,
+                fileName: fileName || undefined
+            };
+            
+            // 这里应该调用后端API获取历史记录
+            // 暂时使用模拟数据进行演示
+            setTimeout(() => {
+                displayHistory(generateMockData(params));
+            }, 500);
+        }
+
+        // 显示历史记录
+        function displayHistory(data) {
+            historyData = data.records;
+            
+            if (data.records.length === 0) {
+                document.getElementById('historyContent').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <h3>暂无历史记录</h3>
+                        <p>执行操作后，历史记录将显示在这里</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let tableHtml = `
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>操作类型</th>
+                            <th>文件名</th>
+                            <th>状态</th>
+                            <th>耗时</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            data.records.forEach((record, index) => {
+                tableHtml += `
+                    <tr>
+                        <td>${formatDateTime(record.timestamp)}</td>
+                        <td><span class="operation-type">${getOperationTypeName(record.operationType)}</span></td>
+                        <td>${record.fileName || 'N/A'}</td>
+                        <td class="${record.status === 'success' ? 'status-success' : 'status-failed'}">
+                            ${record.status === 'success' ? '成功' : '失败'}
+                        </td>
+                        <td>${record.duration ? record.duration + 'ms' : 'N/A'}</td>
+                        <td>
+                            <button class="nav-btn" style="padding: 5px 10px; font-size: 14px;" 
+                                    onclick="showDetail(${index})">详情</button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tableHtml += `
+                    </tbody>
+                </table>
+            `;
+            
+            // 添加分页控件
+            tableHtml += generatePagination(data.total, data.page, data.pageSize);
+            
+            document.getElementById('historyContent').innerHTML = tableHtml;
+        }
+
+        // 生成分页控件
+        function generatePagination(total, page, pageSize) {
+            const totalPages = Math.ceil(total / pageSize);
+            
+            if (totalPages <= 1) return '';
+            
+            let paginationHtml = `
+                <div class="pagination">
+            `;
+            
+            // 上一页按钮
+            if (page > 1) {
+                paginationHtml += `<button onclick="loadHistory(${page - 1})">上一页</button>`;
+            } else {
+                paginationHtml += `<button disabled>上一页</button>`;
+            }
+            
+            // 页码显示
+            paginationHtml += `<span class="current-page">第 ${page} 页，共 ${totalPages} 页</span>`;
+            
+            // 下一页按钮
+            if (page < totalPages) {
+                paginationHtml += `<button onclick="loadHistory(${page + 1})">下一页</button>`;
+            } else {
+                paginationHtml += `<button disabled>下一页</button>`;
+            }
+            
+            paginationHtml += `
+                </div>
+            `;
+            
+            return paginationHtml;
+        }
+
+        // 显示详情
+        function showDetail(index) {
+            const record = historyData[index];
+            if (!record) return;
+            
+            const modalBody = document.getElementById('modalBody');
+            
+            let detailHtml = `
+                <div class="modal-section">
+                    <h3>基本信息</h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px;">
+                        <div>
+                            <strong>操作时间:</strong><br>
+                            ${formatDateTime(record.timestamp)}
+                        </div>
+                        <div>
+                            <strong>操作类型:</strong><br>
+                            ${getOperationTypeName(record.operationType)}
+                        </div>
+                        <div>
+                            <strong>状态:</strong><br>
+                            <span class="${record.status === 'success' ? 'status-success' : 'status-failed'}">
+                                ${record.status === 'success' ? '成功' : '失败'}
+                            </span>
+                        </div>
+                        <div>
+                            <strong>耗时:</strong><br>
+                            ${record.duration ? record.duration + 'ms' : 'N/A'}
+                        </div>
+                        ${record.fileName ? `
+                        <div>
+                            <strong>文件名:</strong><br>
+                            ${record.fileName}
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            // 请求参数
+            if (record.request) {
+                detailHtml += `
+                    <div class="modal-section">
+                        <h3>请求参数</h3>
+                        <pre>${JSON.stringify(record.request, null, 2)}</pre>
+                    </div>
+                `;
+            }
+            
+            // 响应数据
+            if (record.response) {
+                detailHtml += `
+                    <div class="modal-section">
+                        <h3>响应数据</h3>
+                        <pre>${JSON.stringify(record.response, null, 2)}</pre>
+                    </div>
+                `;
+            }
+            
+            // 错误信息
+            if (record.error) {
+                detailHtml += `
+                    <div class="modal-section">
+                        <h3>错误信息</h3>
+                        <pre style="color: #ff6b6b;">${record.error}</pre>
+                    </div>
+                `;
+            }
+            
+            modalBody.innerHTML = detailHtml;
+            document.getElementById('detailModal').style.display = 'flex';
+        }
+
+        // 关闭弹窗
+        function closeModal() {
+            document.getElementById('detailModal').style.display = 'none';
+        }
+
+        // 格式化日期时间
+        function formatDateTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString('zh-CN');
+        }
+
+        // 获取操作类型名称
+        function getOperationTypeName(operationType) {
+            const typeMap = {
+                'ai_analysis': 'AI分析',
+                'cut_video': '视频剪切',
+                'tencent_video_analysis': '腾讯云视频分析',
+                'tencent_video_analysis_result': '腾讯云分析结果',
+                'video_to_base64': '视频转Base64',
+                'ollama': 'Ollama分析',
+                'xfyun': '讯飞星火分析',
+                'tencent': '腾讯云分析'
+            };
+            
+            return typeMap[operationType] || operationType;
+        }
+
+        // 生成模拟数据
+        function generateMockData(filters) {
+            const operationTypes = ['ai_analysis', 'cut_video', 'tencent_video_analysis', 'video_to_base64', 'ollama', 'xfyun', 'tencent'];
+            const fileNames = ['test_video.mp4', 'sample.mov', 'demo.avi', 'example.mkv', 'presentation.mp4'];
+            const records = [];
+            
+            // 生成50条模拟记录
+            for (let i = 0; i < 50; i++) {
+                const record = {
+                    id: i + 1,
+                    timestamp: Date.now() - Math.floor(Math.random() * 1 * 24 * 60 * 60 * 1000), // 30天内的随机时间
+                    operationType: operationTypes[Math.floor(Math.random() * operationTypes.length)],
+                    fileName: fileNames[Math.floor(Math.random() * fileNames.length)],
+                    status: Math.random() > 0.1 ? 'success' : 'failed', // 90%成功率
+                    duration: Math.floor(Math.random() * 5000) + 100, // 100-5000ms
+                    request: {
+                        param1: 'value1',
+                        param2: 'value2'
+                    },
+                    response: {
+                        code: 0,
+                        message: 'success',
+                        data: {
+                            result: 'some result data'
+                        }
+                    }
+                };
+                
+                if (record.status === 'failed') {
+                    record.error = '操作执行失败，错误代码: 500';
+                }
+                
+                records.push(record);
+            }
+            
+            // 根据筛选条件过滤
+            let filteredRecords = records;
+            
+            if (filters.operationType) {
+                filteredRecords = filteredRecords.filter(r => r.operationType === filters.operationType);
+            }
+            
+            if (filters.status) {
+                filteredRecords = filteredRecords.filter(r => r.status === filters.status);
+            }
+            
+            if (filters.fileName) {
+                filteredRecords = filteredRecords.filter(r => r.fileName && r.fileName.includes(filters.fileName));
+            }
+            
+            // 分页处理
+            const total = filteredRecords.length;
+            const startIndex = (filters.page - 1) * filters.pageSize;
+            const endIndex = startIndex + filters.pageSize;
+            const paginatedRecords = filteredRecords.slice(startIndex, endIndex);
+            
+            return {
+                records: paginatedRecords,
+                total: total,
+                page: filters.page,
+                pageSize: filters.pageSize
+            };
+        }
+        
+        // 点击弹窗外部关闭弹窗
+        window.onclick = function(event) {
+            const modal = document.getElementById('detailModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        };
+        
+        // 按ESC键关闭弹窗
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+
+</head>
+<body>
+    <div class="container">
+        <div class="page-header">
+            <h1>操作历史记录</h1>
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="window.location.href='/'">返回主页</button>
+                <button class="nav-btn" onclick="loadHistory()">刷新</button>
+            </div>
+        </div>
+
+        <div class="filter-section">
+            <h2>筛选条件</h2>
+            <div class="filter-controls">
+                <div class="filter-group">
+                    <label for="operationType">操作类型</label>
+                    <select id="operationType">
+                        <option value="">全部类型</option>
+                        <option value="ai_analysis">AI分析</option>
+                        <option value="cut_video">视频剪切</option>
+                        <option value="tencent_video_analysis">腾讯云视频分析</option>
+                        <option value="tencent_video_analysis_result">腾讯云分析结果</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="status">状态</label>
+                    <select id="status">
+                        <option value="">全部状态</option>
+                        <option value="success">成功</option>
+                        <option value="failed">失败</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="fileName">文件名</label>
+                    <input type="text" id="fileName" placeholder="输入文件名">
+                </div>
+                
+                <button class="filter-button" onclick="loadHistory(1)">筛选</button>
+            </div>
+        </div>
+
+        <div class="history-table-container">
+            <div id="historyContent">
+                <div class="loading">正在加载历史记录...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 class="modal-title">操作详情</h2>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+</body>
+
+</html>

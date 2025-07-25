@@ -90,6 +90,15 @@
         object-fit: contain;
     }
 
+    /* 按钮容器 */
+    .button-container {
+        display: flex;
+        gap: 20px;
+        margin-top: 2vh;
+        z-index: 20;
+        position: relative;
+    }
+
     /* 返回按钮样式 */
     .back-btn {
         background-color: #39dcbb;
@@ -101,10 +110,7 @@
         cursor: pointer;
         font-family: 'MiSans', sans-serif;
         font-weight: bold;
-        margin-top: 2vh;
         transition: all 0.3s ease;
-        z-index: 20;
-        position: relative;
     }
 
     .back-btn:hover {
@@ -494,7 +500,10 @@
             </div>
         </div>
 
-        <button class="back-btn" onclick="window.location.href='/'">返回主页</button>
+        <div class="button-container">
+            <button class="back-btn" onclick="window.location.href='/'">返回主页</button>
+            <button class="back-btn" onclick="window.location.href='/history'">历史记录</button>
+        </div>
     </div>
 
     <script>
