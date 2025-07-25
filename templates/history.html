@@ -83,7 +83,7 @@
         color: #000;
         border: none;
         padding: 10px 20px;
-        font-size: 18px; /* 增大字体 */
+        font-size: 18px;
         border-radius: 30px;
         cursor: pointer;
         font-family: 'MiSans', sans-serif;
@@ -148,7 +148,7 @@
         font-family: 'MiSans', sans-serif;
         font-weight: bold;
         height: fit-content;
-        font-size: 18px; /* 增大字体 */
+        font-size: 18px; 
     }
 
     .filter-button:hover {
@@ -221,7 +221,7 @@
         border-radius: 5px;
         cursor: pointer;
         font-family: 'MiSans', sans-serif;
-        font-size: 18px; /* 增大字体 */
+        font-size: 18px;
     }
 
     .pagination button:hover:not(:disabled) {
@@ -237,7 +237,7 @@
         color: #39dcbb;
         font-weight: bold;
         padding: 8px 12px;
-        font-size: 18px; /* 增大字体 */
+        font-size: 18px; 
     }
 
     /* 详情弹窗 */
@@ -381,12 +381,11 @@
 </style>
 
 <script>
-    // 全局变量
     let currentPage = 1;
     const pageSize = 10;
     let historyData = [];
 
-    // 页面加载完成后初始化
+    //初始化
     document.addEventListener('DOMContentLoaded', function() {
         loadHistory();
     });
@@ -447,12 +446,12 @@
 
     // 应用筛选条件
     function applyFilter() {
-        loadHistory(1); // 重置到第一页并应用筛选
+        loadHistory(1); 
     }
 
     // 显示历史记录
     function displayHistory(data) {
-        // 转换数据格式以匹配前端显示需求
+        // 转换数据格式
         historyData = data.records.map(record => ({
             id: record.id,
             timestamp: record.timestamp,
@@ -669,11 +668,11 @@
         for (let i = 0; i < 50; i++) {
             const record = {
                 id: i + 1,
-                timestamp: Date.now() - Math.floor(Math.random() * 1 * 24 * 60 * 60 * 1000), // 30天内的随机时间
+                timestamp: Date.now() - Math.floor(Math.random() * 3 * 24 * 60 * 60 * 1000), 
                 operationType: operationTypes[Math.floor(Math.random() * operationTypes.length)],
                 fileName: fileNames[Math.floor(Math.random() * fileNames.length)],
-                status: Math.random() > 0.1 ? 'success' : 'failed', // 90%成功率
-                duration: Math.floor(Math.random() * 5000) + 100, // 100-5000ms
+                status: Math.random() > 0.1 ? 'success' : 'failed',
+                duration: Math.floor(Math.random() * 5000) + 100,
                 request: {
                     param1: 'value1',
                     param2: 'value2'

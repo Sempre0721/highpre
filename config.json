@@ -13,7 +13,7 @@
         "default_model": "qwen2.5vl:3b"
         },
         "xfyun": {
-        "api_key": "EofwojbrKQpYiFdIGBNW:WxSxTTMZBTooLcoiFWEd",
+        "api_key": "请填入你在讯飞开放平台获得的APIkey",
         "base_url": "https://spark-api-open.xf-yun.com/v1",
         "default_model": "4.0Ultra"
         },

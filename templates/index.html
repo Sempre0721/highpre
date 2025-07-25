@@ -1,3 +1,4 @@
+<!-- templates/index.html -->
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -600,7 +601,7 @@
                     
                     <div class="param-group">
                         <label class="param-label">期望片段长度 (秒)</label>
-                        <input type="number" class="param-input" id="expectedClipLength" min="1" value="30" step="1">
+                        <input type="number" class="param-input" id="expectedClipLength" min="1" value="3" step="1">
                     </div>
                     
                     <div class="param-row">
@@ -1079,7 +1080,7 @@
                 analyzeBtnWrapper.classList.add('disabled');
                 
                 const requestData = {
-                    prompt: editingRequirements.value || "请分析这个视频并提供剪辑建议",
+                    prompt: editingRequirements.value,
                     model: modelSelection.value,
                     temperature: parseFloat(modelTemperature.value),
                     seed: parseInt(randomSeed.value),
@@ -1130,7 +1131,7 @@
                 analyzeBtnWrapper.classList.add('disabled');
                 
                 const requestData = {
-                    prompt: editingRequirements.value || "请分析这个视频并提供剪辑建议",
+                    prompt: editingRequirements.value ,
                     model: modelSelection.value,
                     temperature: parseFloat(modelTemperature.value),
                     maxTokens: parseInt(maxTokens.value)
@@ -1180,7 +1181,7 @@
                 analyzeBtnWrapper.classList.add('disabled');
                 
                 const requestData = {
-                    prompt: editingRequirements.value || "请分析这个视频并提供剪辑建议",
+                    prompt: editingRequirements.value,
                     model: modelSelection.value,
                     temperature: parseFloat(modelTemperature.value),
                     maxTokens: parseInt(maxTokens.value)
@@ -1271,7 +1272,6 @@
                         
                         errorMessage.style.display = 'none';
                         
-                        //window.open('http://127.0.0.1:5839/result', '_blank');
                         window.location.href = 'http://127.0.0.1:5839/result';
                     } else {
                         errorMessage.textContent = `剪辑失败: ${data.message}\n${data.error || ''}`;
@@ -1351,7 +1351,7 @@
                     // 构建请求数据
                     const requestData = {
                         video_name: selectedFilePath,
-                        requirements: editingRequirements.value || "请分析这个视频并提供剪辑建议",
+                        requirements: editingRequirements.value,
                         model_source: modelSource.value,
                         model: modelSelection.value,
                         temperature: parseFloat(modelTemperature.value),
@@ -1426,8 +1426,6 @@
                     alert('请先选择视频');
                     return;
                 }
-
-                // 调用新的视频分析函数
                 analyzeVideoContent();
             });
     </script>

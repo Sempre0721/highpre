@@ -6,7 +6,6 @@
     <title>剪辑结果 - highpre智能AI剪辑</title>
     <link rel="icon" href="static/favicon.svg" type="image/svg+xml">
     <style>
-    /* 自定义字体 */
     @font-face {
         font-family: 'MiSans', 'Microsoft YaHei', 'Segoe UI', sans-serif;
         src: url('/static/fonts/MiSans.ttf') format('truetype');
@@ -15,11 +14,10 @@
         font-display: swap;
     }
 
-    /* 页面基础样式 */
     body {
         margin: 0;
         padding: 0;
-        background: #000; /* 纯黑色背景 */
+        background: #000; 
         color: white;
         font-family: 'MiSans', 'Segoe UI', sans-serif;
         height: 100vh;
@@ -27,7 +25,6 @@
         position: relative;
     }
 
-    /* 赛博朋克风格背景网格效果 */
     body::before {
         content: "";
         position: absolute;
@@ -57,7 +54,7 @@
         box-sizing: border-box;
     }
 
-    /* 视频容器 - 初始占据整个屏幕 */
+    /* 视频容器 */
     .video-container {
         width: 100vw;
         height: 100vh;
@@ -74,10 +71,10 @@
         z-index: 10;
         transition: all 0.5s ease;
     }
-
+    /* 16:9 比例 */
     .video-container.video-small {
         width: 800px;
-        height: 450px; /* 16:9 比例 */
+        height: 450px; 
         position: relative;
         margin-top: 20px;
         border-radius: 10px;
@@ -316,6 +313,22 @@
         margin: 0 2px;
         font-weight: bold;
     }
+    
+    /* 错误信息样式 */
+    .error-message {
+        color: #ff6b6b;
+        background-color: rgba(255, 0, 0, 0.1);
+        border: 1px solid #ff6b6b;
+        border-radius: 5px;
+        padding: 10px;
+        margin: 10px 0;
+        text-align: center;
+        font-family: monospace;
+        font-size: 14px;
+        display: none;
+        width: 100%;
+        box-sizing: border-box;
+    }
 </style>
 </head>
 <body>
@@ -336,6 +349,7 @@
                 <input type="number" min="1" value="1" class="param-fps">
                 <label>输出路径</label>
                 <input type="text" value="frames/frame_%04d.png" class="param-output">
+                <div class="error-message"></div>
                 <button onclick="processVideo('extract_frames', this)">开始处理</button>
             </div>
 
@@ -355,6 +369,7 @@
                 </select>
                 <label>输出路径</label>
                 <input type="text" value="output/output.mp4" class="param-output">
+                <div class="error-message"></div>
                 <button onclick="processVideo('convert_format', this)">开始处理</button>
             </div>
 
@@ -371,6 +386,7 @@
                 </div>
                 <label>输出路径</label>
                 <input type="text" value="output/resized_video.mp4" class="param-output">
+                <div class="error-message"></div>
                 <button onclick="processVideo('resize_video', this)">开始处理</button>
             </div>
 
@@ -399,6 +415,7 @@
                 </div>
                 <label>输出路径</label>
                 <input type="text" value="output/trimmed_video.mp4" class="param-output">
+                <div class="error-message"></div>
                 <button onclick="processVideo('trim_video', this)">开始处理</button>
             </div>
 
@@ -415,6 +432,7 @@
                 </select>
                 <label>输出路径</label>
                 <input type="text" value="output/audio.mp3" class="param-output">
+                <div class="error-message"></div>
                 <button onclick="processVideo('extract_audio', this)">开始处理</button>
             </div>
 
@@ -443,6 +461,7 @@
                 </div>
                 <label>输出路径</label>
                 <input type="text" value="output/clip.gif" class="param-output">
+                <div class="error-message"></div>
                 <button onclick="processVideo('extract_gif', this)">开始处理</button>
             </div>
 
@@ -453,13 +472,14 @@
                 <input type="number" min="100" value="1024" class="param-bitrate">
                 <label>输出路径</label>
                 <input type="text" value="output/bitrate_adjusted.mp4" class="param-output">
+                <div class="error-message"></div>
                 <button onclick="processVideo('adjust_bitrate', this)">开始处理</button>
             </div>
 
             <!-- 添加水印 -->
             <div class="card">
                 <h3>添加水印</h3>
-                <label>水印位置</label>
+                <label>水印图片位置</label>
                 <select class="param-position">
                     <option value="top_left">左上</option>
                     <option value="top_right">右上</option>
@@ -471,6 +491,7 @@
                 <input type="text" value="watermark.png" class="param-watermark-path">
                 <label>输出路径</label>
                 <input type="text" value="output/watermarked_video.mp4" class="param-output">
+                <div class="error-message"></div>
                 <button onclick="processVideo('add_watermark', this)">开始处理</button>
             </div>
 
@@ -483,6 +504,7 @@
                 <input type="text" value="video2.mp4" class="param-video2">
                 <label>输出路径</label>
                 <input type="text" value="output/merged_video.mp4" class="param-output">
+                <div class="error-message"></div>
                 <button onclick="processVideo('concat_videos', this)">开始处理</button>
             </div>
 
@@ -496,6 +518,7 @@
                 <input type="hidden" class="param-volume" value="1.0">
                 <label>输出路径</label>
                 <input type="text" value="output/volume_adjusted.mp4" class="param-output">
+                <div class="error-message"></div>
                 <button onclick="processVideo('adjust_volume', this)">开始处理</button>
             </div>
         </div>
@@ -513,20 +536,23 @@
         const cardsContainer = document.getElementById('cardsContainer');
         const pageTitle = document.getElementById('pageTitle');
         
-        videoElement.src = '../videos/output/cut_test.mp4';
+        // 获取视频路径
+        function getVideoPath() {
+            // 待开发
+            return '/videos/output/cut_test.mp4';
+        }
+        
+        videoElement.src = getVideoPath();
 
-        // 下一步按钮点击事件
+        //动画
         nextBtn.addEventListener('click', function() {
-            // 缩小视频容器
             videoContainer.classList.add('video-small');
             
-            // 显示标题和卡片容器
             setTimeout(() => {
                 pageTitle.classList.add('show');
                 cardsContainer.classList.add('show');
             }, 300);
             
-            // 隐藏下一步按钮
             nextBtn.style.display = 'none';
         });
 
@@ -544,7 +570,7 @@
             updateKnob(1.0);
 
             knob.addEventListener('mousedown', function(e) {
-                e.preventDefault(); // 阻止默认文本选择行为
+                e.preventDefault(); 
                 isDragging = true;
                 startY = e.clientY;
                 startValue = parseFloat(volumeInput.value);
@@ -553,10 +579,10 @@
 
             document.addEventListener('mousemove', function(e) {
                 if (isDragging) {
-                    e.preventDefault(); // 阻止默认文本选择行为
-                    const deltaY = startY - e.clientY; // 向上拖动为正
+                    e.preventDefault(); 
+                    const deltaY = startY - e.clientY; 
                     let newValue = startValue + deltaY * sensitivity;
-                    newValue = Math.min(3.0, Math.max(0.0, newValue)); // 限制在0.0-3.0之间
+                    newValue = Math.min(3.0, Math.max(0.0, newValue)); 
                     updateKnob(newValue);
                 }
             });
@@ -578,18 +604,19 @@
             function updateKnob(value) {
                 volumeInput.value = value.toFixed(1);
                 knobValue.textContent = value.toFixed(1);
-                const rotation = (value * 120) + 180; // 0值对应180度(竖直向下)，3值对应540度(180度+360度)
+                const rotation = (value * 120) + 180; 
                 knob.style.transform = `rotate(${rotation}deg)`;
             }
         });
 
         function processVideo(action, buttonElement) {
-            const videoPath = '../videos/output/cut_test.mp4';
+            const card = buttonElement.closest('.card');
+            const errorMessage = card.querySelector('.error-message');
+            errorMessage.style.display = 'none';
+            
+            const videoPath = getVideoPath();
             let params = {};
             
-            // 获取当前按钮所在的卡片容器
-            const card = buttonElement.closest('.card');
-
             switch (action) {
                 case 'extract_frames':
                     params.fps = card.querySelector('.param-fps').value;
@@ -668,12 +695,28 @@
                     params: params
                 })
             })
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+                return res.json();
+            })
             .then(data => {
-                alert('处理成功！输出路径：' + data.output_path);
+                if (data.code === 0) {
+                    const outputPath = data.output_path || data.data?.output_path;
+                    if (outputPath) {
+                        alert('处理成功！输出路径：' + outputPath);
+                    } else {
+                        alert('处理成功！但未返回输出路径');
+                    }
+                } else {
+                    errorMessage.textContent = data.message || '处理失败';
+                    errorMessage.style.display = 'block';
+                }
             })
             .catch(err => {
-                alert('处理失败：' + err.message);
+                errorMessage.textContent = '处理失败：' + err.message;
+                errorMessage.style.display = 'block';
             });
         }
     </script>
