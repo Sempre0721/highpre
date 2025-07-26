@@ -571,6 +571,8 @@
                             <option value="local" selected>Ollama</option>
                             <option value="xfyun">讯飞星火</option>
                             <option value="tencent">腾讯云</option>
+                            <option value="kimi">Kimi</option>
+                            <option value="modelscope">ModelScope</option>
                         </select>
                     </div>
                     
@@ -580,17 +582,23 @@
                             <!-- Ollama 模型 -->
                             <option value="qwen2.5vl:3b" data-source="local" selected>qwen2.5vl:3b</option>
                             <option value="llama3" data-source="local">Llama 3</option>
-                            <option value="mistral" data-source="local">Mistral</option>
+                            <option value="qwen3" data-source="local">qwen3</option>
                             
                             <!-- 讯飞星火模型 -->
                             <option value="4.0Ultra" data-source="xfyun" selected>4.0 Ultra</option>
                             <option value="3.5" data-source="xfyun">Spark 3.5</option>
-                            <option value="3.1" data-source="xfyun">Spark 3.1</option>
+                            <option value="3.0" data-source="xfyun">Spark 3.1</option>
                             
                             <!-- 腾讯云模型 -->
                             <option value="hunyuan-lite" data-source="tencent">Hunyuan Lite</option>
                             <option value="hunyuan-standard" data-source="tencent">Hunyuan Standard</option>
                             <option value="hunyuan-pro" data-source="tencent">Hunyuan Pro</option>
+
+                            <!-- Kimi 模型 -->
+                            <option value="kimi-k2" data-source="kimi">Kimi K2</option>
+                            
+                            <!-- ModelScope 模型 -->
+                            <option value="MusePublic/FLUX.1-Kontext-Dev" data-source="modelscope">FLUX.1-Kontext-Dev</option>
                         </select>
                     </div>
                     
@@ -1223,6 +1231,138 @@
                     alert('调用 AI 分析接口失败: ' + error.message);
                 });
             }
+            
+
+            function callKimiAPI() {
+                processingText.style.display = 'block';
+                textDisplay.value = "正在请求Kimi AI分析...\n";
+                
+                analyzeBtnWrapper.classList.add('disabled');
+                
+                const requestData = {
+                    prompt: editingRequirements.value,
+                    model: modelSelection.value,
+                    temperature: parseFloat(modelTemperature.value),
+                    maxTokens: parseInt(maxTokens.value)
+                };
+                
+                fetch('/kimi', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    analyzeBtnWrapper.classList.remove('disabled');
+                    
+                    processingText.style.display = 'none';
+                    
+                    if (data.code === 0) {
+                        if (data.data && data.data.response) {
+                            textDisplay.value += "Kimi AI 分析结果:\n" + data.data.response + "\n";
+                        }
+                        
+                        errorMessage.style.display = 'none';
+                    } else {
+                        errorMessage.textContent = `Kimi AI 分析失败: ${data.message}`;
+                        errorMessage.style.display = 'block';
+                        textDisplay.value += "Kimi AI 分析失败: " + data.message + "\n";
+                        alert('Kimi AI 分析失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    analyzeBtnWrapper.classList.remove('disabled');
+                    
+                    errorMessage.textContent = `网络错误: ${error.message}`;
+                    errorMessage.style.display = 'block';
+                    textDisplay.value += "网络错误: " + error.message + "\n";
+                    textDisplay.value += "错误详情: " + JSON.stringify(error, null, 2) + "\n";
+                    alert('调用 Kimi AI 分析接口失败: ' + error.message);
+                });
+            }
+
+            function callModelScopeAPI() {
+                processingText.style.display = 'block';
+                textDisplay.value = "正在请求ModelScope AI分析...\n";
+                
+                analyzeBtnWrapper.classList.add('disabled');
+                
+                const requestData = {
+                    prompt: editingRequirements.value,
+                    model: modelSelection.value,
+                    temperature: parseFloat(modelTemperature.value),
+                    maxTokens: parseInt(maxTokens.value)
+                };
+                
+                fetch('/modelscope', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    analyzeBtnWrapper.classList.remove('disabled');
+                    
+                    processingText.style.display = 'none';
+                    
+                    if (data.code === 0) {
+                        if (data.data && data.data.response) {
+                            textDisplay.value += "ModelScope AI 分析结果:\n" + data.data.response + "\n";
+                        }
+                        
+                        errorMessage.style.display = 'none';
+                    } else {
+                        errorMessage.textContent = `ModelScope AI 分析失败: ${data.message}`;
+                        errorMessage.style.display = 'block';
+                        textDisplay.value += "ModelScope AI 分析失败: " + data.message + "\n";
+                        alert('ModelScope AI 分析失败: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    analyzeBtnWrapper.classList.remove('disabled');
+                    
+                    errorMessage.textContent = `网络错误: ${error.message}`;
+                    errorMessage.style.display = 'block';
+                    textDisplay.value += "网络错误: " + error.message + "\n";
+                    textDisplay.value += "错误详情: " + JSON.stringify(error, null, 2) + "\n";
+                    alert('调用 ModelScope AI 分析接口失败: ' + error.message);
+                });
+            }
+
+            analyzeBtnWrapper.addEventListener('click', function () {
+                if (analyzeBtnWrapper.classList.contains('disabled')) {
+                    return;
+                }
+
+                if (!currentVideo) {
+                    alert('请先选择视频');
+                    return;
+                }
+
+                switch(modelSource.value) {
+                    case 'local':
+                        callOllamaAPI();
+                        break;
+                    case 'xfyun':
+                        callXfyunAPI();
+                        break;
+                    case 'tencent':
+                        callTencentAPI();
+                        break;
+                    case 'kimi':
+                        callKimiAPI();
+                        break;
+                    case 'modelscope':
+                        callModelScopeAPI();
+                        break;
+                    default:
+                        callOllamaAPI();
+                }
+            });
             
             function cutVideoOnServer(start, end, filename) {
                 progressContainer.style.display = 'block';

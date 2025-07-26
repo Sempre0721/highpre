@@ -10,31 +10,41 @@
     },
     "models": {
         "ollama": {
-        "default_model": "qwen2.5vl:3b"
+            "default_model": "qwen2.5vl:3b"
         },
         "xfyun": {
-        "api_key": "请填入你在讯飞开放平台获得的APIkey",
-        "base_url": "https://spark-api-open.xf-yun.com/v1",
-        "default_model": "4.0Ultra"
+            "api_key": "请填入你在讯飞开放平台获得的APIkey",
+            "base_url": "https://spark-api-open.xf-yun.com/v1",
+            "default_model": "4.0Ultra"
         },
         "tencent": {
-        "api_key": "YOUR_TENCENT_API_KEY",
-        "secret_id": "YOUR_TENCENT_SECRET_ID",
-        "secret_key": "YOUR_TENCENT_SECRET_KEY",
-        "base_url": "https://api.hunyuan.cloud.tencent.com/v1",
-        "default_model": "hunyuan-lite",
-        "region": "ap-beijing",
-        "ivld_endpoint": "ivld.tencentcloudapi.com"
+            "api_key": "YOUR_TENCENT_API_KEY",
+            "secret_id": "YOUR_TENCENT_SECRET_ID",
+            "secret_key": "YOUR_TENCENT_SECRET_KEY",
+            "base_url": "https://api.hunyuan.cloud.tencent.com/v1",
+            "default_model": "hunyuan-lite",
+            "region": "ap-beijing",
+            "ivld_endpoint": "ivld.tencentcloudapi.com"
+        },
+        "kimi": {
+            "api_key": "YOUR_KIMI_API_KEY",
+            "base_url": "https://api.moonshot.cn/v1",
+            "default_model": "kimi-k2"
+        },
+        "modelscope": {
+            "api_key": "YOUR_MODELSCOPE_API_KEY",
+            "base_url": "https://api-inference.modelscope.cn/v1",
+            "default_model": "MusePublic/FLUX.1-Kontext-Dev"
         }
     },
     "ffmpeg": {
         "default_params": {
-        "videoCodec": "libx264",
-        "audioCodec": "aac",
-        "preset": "fast",
-        "crf": 23,
-        "pixFmt": "yuv420p",
-        "movFlags": "+faststart"
+            "videoCodec": "libx264",
+            "audioCodec": "aac",
+            "preset": "fast",
+            "crf": 23,
+            "pixFmt": "yuv420p",
+            "movFlags": "+faststart"
         }
     }
 }
