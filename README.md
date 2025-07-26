@@ -132,4 +132,4 @@ INFO:werkzeug:127.0.0.1 - - [26/Jul/2025 11:20:46] "GET / HTTP/1.1" 200 -
 ## 许可证
 本项目采用MIT许可证，详情请参见LICENSE文件。
 
-<p align="center"> Made with ❤️ by <a href="https://github.com/Sempre0721">sempre</a> <a href="https://github.com/LaoSiBai">laosibai</a></p>
+<p align="center"> Powered ❤️ by <a href="https://github.com/Sempre0721">sempre</a> <a href="https://github.com/LaoSiBai">laosibai</a></p>
