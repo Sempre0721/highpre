@@ -1,4 +1,4 @@
-# HighPre - 高性能Web应用框架
+# HighPre - 本地化AI剪辑助手
 
 [![Python Version](https://img.shields.io/badge/python-3.8%2B-blue)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
